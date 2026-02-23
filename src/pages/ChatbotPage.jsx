@@ -1,74 +1,220 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { aiAgentService } from '../services/aiAgentService';
 import './ChatbotPage.css';
 
 const ChatbotPage = () => {
   const [messages, setMessages] = useState([
-    { id: 1, text: "Hello! I'm your AI assistant. How can I help you today?", sender: 'bot' }
+    { 
+      id: 1, 
+      text: "Hello! I'm your Chin Hin Employee Assistant. I can help you with leave management, room bookings, and service tickets. How can I help you today?", 
+      sender: 'bot' 
+    }
   ]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [currentIntent, setCurrentIntent] = useState(null);
+  const [formData, setFormData] = useState({});
+  const [userId] = useState('EMP001');
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!inputText.trim()) return;
 
+    // Add user message
     const userMessage = {
       id: messages.length + 1,
       text: inputText,
       sender: 'user',
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
+    
     setMessages(prev => [...prev, userMessage]);
+    const userInput = inputText;
     setInputText('');
     setIsTyping(true);
 
-    setTimeout(() => {
-      const botResponse = {
+    try {
+      // Process message through AI agent
+      const response = await aiAgentService.processMessage(userInput, userId);
+      
+      console.log('📦 AI Agent Response:', response); // Debug log
+      
+      // SAFETY CHECK: Make sure response exists
+      if (!response) {
+        throw new Error('No response from AI agent');
+      }
+      
+      let botResponse;
+      
+      // Check if response has intent (for multi-step forms)
+      if (response.intent) {
+        // If we need more information
+        if (response.required_fields) {
+          setCurrentIntent({
+            intent: response.intent,
+            fields: response.required_fields,
+            currentField: 0,
+            collectedData: {}
+          });
+          botResponse = response.message + '\n' + response.required_fields[0];
+        } else {
+          // Simple response with message
+          botResponse = response.message || JSON.stringify(response, null, 2);
+        }
+      } 
+      // Check if response has message directly
+      else if (response.message) {
+        botResponse = response.message;
+      }
+      // Otherwise, stringify the whole response
+      else {
+        botResponse = JSON.stringify(response, null, 2);
+      }
+      
+      const botMessage = {
         id: messages.length + 2,
-        text: getBotResponse(inputText),
+        text: botResponse,
         sender: 'bot',
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
-      setMessages(prev => [...prev, botResponse]);
+      
+      setMessages(prev => [...prev, botMessage]);
+      
+    } catch (error) {
+      console.error('❌ Chat error:', error);
+      
+      // User-friendly error message
+      let errorText = "Sorry, I encountered an error. ";
+      
+      if (error.message.includes('balance')) {
+        errorText = "I couldn't fetch your leave balance. Please try again.";
+      } else if (error.message.includes('network') || error.message.includes('connection')) {
+        errorText = "Connection issue. Please check your network and try again.";
+      } else {
+        errorText += "Please try again or contact support.";
+      }
+      
+      const errorMessage = {
+        id: messages.length + 2,
+        text: errorText,
+        sender: 'bot',
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1000);
+    }
   };
 
-  const getBotResponse = (input) => {
-    const text = input.toLowerCase();
-    if (text.includes('leave') || text.includes('vacation')) 
-      return "You have 15 vacation days remaining. Would you like to apply for leave?";
-    if (text.includes('salary') || text.includes('pay')) 
-      return "Your next paycheck is on the 30th. Your basic salary is $5,000.";
-    if (text.includes('meeting') || text.includes('schedule')) 
-      return "Your next meeting is 'Team Standup' at 10:00 AM today.";
-    if (text.includes('task') || text.includes('todo')) 
-      return "You have 5 pending tasks. The priority task is 'Complete Q4 report'.";
-    if (text.includes('holiday') || text.includes('holidays')) 
-      return "Next holiday is Thanksgiving on November 23rd.";
-    if (text.includes('hr') || text.includes('human resources')) 
-      return "You can contact HR at hr@company.com or ext. 4500.";
-    return "I'll help you with that. Could you please provide more details?";
+  const handleFormSubmission = async (userInput) => {
+    try {
+      // Update collected data
+      const updatedData = {
+        ...currentIntent.collectedData,
+        [currentIntent.fields[currentIntent.currentField]]: userInput
+      };
+      
+      // Check if we have more fields to collect
+      if (currentIntent.currentField + 1 < currentIntent.fields.length) {
+        setCurrentIntent({
+          ...currentIntent,
+          currentField: currentIntent.currentField + 1,
+          collectedData: updatedData
+        });
+        
+        const nextField = currentIntent.fields[currentIntent.currentField + 1];
+        const botMessage = {
+          id: messages.length + 2,
+          text: `Please provide: ${nextField}`,
+          sender: 'bot',
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+        setMessages(prev => [...prev, botMessage]);
+      } else {
+        // All fields collected, execute the action
+        const result = await aiAgentService.executeAction(currentIntent.intent, {
+          ...updatedData,
+          employee_id: userId,
+          host_user_id: userId
+        });
+        
+        const botMessage = {
+          id: messages.length + 2,
+          text: formatResponse(result),
+          sender: 'bot',
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+        
+        setMessages(prev => [...prev, botMessage]);
+        setCurrentIntent(null); // Reset form state
+      }
+    } catch (error) {
+      console.error('❌ Form submission error:', error);
+      const errorMessage = {
+        id: messages.length + 2,
+        text: "Error processing your request. Please try again.",
+        sender: 'bot',
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      setCurrentIntent(null);
+    }
+  };
+
+  const formatResponse = (data) => {
+    if (!data) return "No response data";
+    
+    if (typeof data === 'string') return data;
+    
+    try {
+      // Format JSON responses nicely
+      if (data.message) return data.message;
+      
+      // Format leave balance
+      if (data.annual_leave) {
+        return `Your leave balance:\n` +
+               `📅 Annual: ${data.annual_leave.remaining || 0} days\n` +
+               `🏥 Medical: ${data.medical_leave?.remaining || 0} days`;
+      }
+      
+      // Format rooms
+      if (data.rooms) {
+        return `Available rooms: ${data.rooms.length}\n` +
+               data.rooms.map(r => `• ${r.name}`).join('\n');
+      }
+      
+      // Format tickets
+      if (data.tickets) {
+        return `You have ${data.tickets.length} active tickets.`;
+      }
+      
+      return JSON.stringify(data, null, 2);
+    } catch (e) {
+      return "Response received. Check the data for details.";
+    }
   };
 
   const quickReplies = [
+    'Check leave balance',
     'Apply for leave',
-    'Check salary',
-    'My schedule',
-    'HR policies',
-    'IT support'
+    'Search available rooms',
+    'Book a meeting room',
+    'Create service ticket',
+    'My bookings',
+    'Help'
   ];
 
   return (
     <div className="chatbot-page">
       <div className="chatbot-header">
-        <h1>💬 Employee Assistant</h1>
-        <span className="status">● Online</span>
+        <h1>💬 Chin Hin Employee Assistant</h1>
+        <span className="status">● Connected</span>
       </div>
 
       <div className="quick-replies">
@@ -87,7 +233,7 @@ const ChatbotPage = () => {
         {messages.map(message => (
           <div key={message.id} className={`message ${message.sender}`}>
             <div className="message-content">
-              <p>{message.text}</p>
+              <p style={{ whiteSpace: 'pre-line' }}>{message.text}</p>
               <span className="message-time">{message.time}</span>
             </div>
           </div>
