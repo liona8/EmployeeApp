@@ -1,3 +1,4 @@
+// chatbotPage.jsx 
 import { useState, useRef, useEffect } from "react";
 import "./all.css";
 
@@ -59,6 +60,7 @@ export default function ChatbotPage() {
 
   const send = async (text) => {
     if (!text.trim() || loading) return;
+
     const userMsg = {
       id: Date.now(),
       role: "user",
@@ -69,17 +71,30 @@ export default function ChatbotPage() {
     setInput("");
     setLoading(true);
 
-    // Simulate API delay
-    await new Promise(r => setTimeout(r, 900 + Math.random() * 600));
+    try {
+      const response = await api.post("/api/ai/chat", {
+        message: text.trim(),
+        // pass conversation history if your agent supports multi-turn
+        history: messages.map(m => ({ role: m.role === "ai" ? "assistant" : "user", content: m.text })),
+      });
 
-    const aiMsg = {
-      id: Date.now() + 1,
-      role: "ai",
-      text: generateResponse(text),
-      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    };
-    setMessages(prev => [...prev, aiMsg]);
-    setLoading(false);
+      const aiMsg = {
+        id: Date.now() + 1,
+        role: "ai",
+        text: response.data.reply, // adjust key to match your API response shape
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      };
+      setMessages(prev => [...prev, aiMsg]);
+    } catch (error) {
+      setMessages(prev => [...prev, {
+        id: Date.now() + 1,
+        role: "ai",
+        text: `⚠️ Error: ${error.message}`,
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      }]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleKey = (e) => {
