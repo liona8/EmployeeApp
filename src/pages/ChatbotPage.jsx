@@ -1,6 +1,7 @@
 // chatbotPage.jsx 
 import { useState, useRef, useEffect } from "react";
 import "./all.css";
+import api from '../services/api';
 
 const QUICK_ACTIONS = [
   "Check my leave balance",
