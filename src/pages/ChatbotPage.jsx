@@ -20,33 +20,6 @@ const INITIAL_MESSAGES = [
   },
 ];
 
-// Simulated AI responses
-function generateResponse(input) {
-  const lower = input.toLowerCase();
-  if (lower.includes("leave balance")) {
-    return `**Your Leave Balance (EMP001 - Ahmad Razif)**\n\n📅 Annual Leave: **13 days** remaining (5 used / 18 entitlement)\n🏥 Medical Leave: **12 days** remaining (2 used / 14 entitlement)\n💼 Compassionate Leave: **3 days** available\n↩ Carry Forward: **3 days** (expires Jun 30, 2026)\n\nWould you like to apply for leave or check specific leave policies?`;
-  }
-  if (lower.includes("apply") && lower.includes("annual")) {
-    return `To apply for annual leave, I'll need the following details:\n\n1. **Start date** (YYYY-MM-DD)\n2. **End date** (YYYY-MM-DD)\n3. **Reason** (optional)\n\nPlease note: Annual leave requires **minimum 5 working days advance notice**. Would you like to proceed? You can also use the Leave Management page for a full form.`;
-  }
-  if (lower.includes("book") && lower.includes("room")) {
-    return `I can help you book a meeting room! Here's what I need:\n\n📅 **Date**: What date do you need the room?\n⏰ **Time**: What time should the meeting start?\n⏱ **Duration**: How long is the meeting?\n👥 **Capacity**: How many attendees?\n🛠 **Amenities**: Any required equipment (projector, video conferencing, etc.)?\n\nAlternatively, use the Calendar page to browse availability visually.`;
-  }
-  if (lower.includes("upcoming booking")) {
-    return `**Your Upcoming Room Bookings**\n\n🏢 **BKG-20260228-001**\n   Boardroom A · Feb 28, 2026 · 10:00 AM – 11:00 AM\n   Q1 Sprint Planning\n\n🏢 **BKG-20260303-002**\n   Meeting Room 3B · Mar 3, 2026 · 2:00 PM – 3:30 PM\n   Design Review\n\nWould you like to modify or cancel any of these bookings?`;
-  }
-  if (lower.includes("service ticket") || lower.includes("maintenance")) {
-    return `To create a service ticket, please provide:\n\n🔧 **Issue Title**: Brief description\n📝 **Description**: Detailed explanation\n📂 **Category**: AC / Lighting / Plumbing / IT / Other\n⚡ **Priority**: Low / Medium / High\n📍 **Location**: Room and floor number\n\nWhat issue would you like to report?`;
-  }
-  if (lower.includes("entitlement") || lower.includes("policy")) {
-    return `**Your Leave Entitlement (Grade 16, Permanent, 4.5 years)**\n\n📅 Annual Leave: **18 days/year** (2–5 years band)\n🏥 Medical Leave: **14 days/year**\n🏥 Hospitalization: Up to **60 days/year**\n❤️ Compassionate: **3 days/occurrence** (max 9/year)\n👶 Paternity: **7 consecutive days** (up to 5 confinements)\n\nNote: Annual leave requires **5 working days** advance notice. Emergency leave must be notified by **9:00 AM**.`;
-  }
-  if (lower.includes("hello") || lower.includes("hi")) {
-    return `Hello! 👋 I'm ready to assist you with:\n\n• **Leave management** — apply, check balances, view history\n• **Room bookings** — search availability, book, modify\n• **Service tickets** — report issues, track status\n• **Policy info** — entitlements, rules, deadlines\n\nWhat would you like to do?`;
-  }
-  return `I understand you're asking about "${input}". Let me help with that!\n\nCurrently I can assist with:\n\n• Leave applications & balance checks\n• Room booking & availability search\n• Service ticket creation\n• HR policy information\n\nFor complex requests, connect this chat to the backend API at \`/api/ai/chat\`. What specific information do you need?`;
-}
-
 export default function ChatbotPage() {
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [input, setInput] = useState("");
@@ -60,7 +33,7 @@ export default function ChatbotPage() {
 
   const send = async (text) => {
     if (!text.trim() || loading) return;
-
+    
     const userMsg = {
       id: Date.now(),
       role: "user",
@@ -72,26 +45,27 @@ export default function ChatbotPage() {
     setLoading(true);
 
     try {
-      const response = await api.post("/api/ai/chat", {
+      const response = await api.post('/api/ai/chat', {
         message: text.trim(),
-        // pass conversation history if your agent supports multi-turn
-        history: messages.map(m => ({ role: m.role === "ai" ? "assistant" : "user", content: m.text })),
+        user_id: 'EMP001'
       });
 
       const aiMsg = {
         id: Date.now() + 1,
         role: "ai",
-        text: response.data.reply, // adjust key to match your API response shape
+        text: response.data.reply,
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
       setMessages(prev => [...prev, aiMsg]);
+
     } catch (error) {
-      setMessages(prev => [...prev, {
+      const errMsg = {
         id: Date.now() + 1,
         role: "ai",
-        text: `⚠️ Error: ${error.message}`,
+        text: "Sorry, I'm having trouble connecting. Please try again.",
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      }]);
+      };
+      setMessages(prev => [...prev, errMsg]);
     } finally {
       setLoading(false);
     }
