@@ -58,7 +58,7 @@ export default function App() {
             <div className="avatar-circle">A</div>
             {sidebarOpen && (
               <div className="user-info-mini">
-                <span className="user-name-mini">Ahmad Razif</span>
+                <span className="user-name-mini">Kueh Pang Lang</span>
                 <span className="user-id-mini">EMP001</span>
               </div>
             )}

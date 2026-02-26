@@ -3,7 +3,7 @@ import "./all.css";
 
 const mockEmployee = {
   id: "EMP001",
-  name: "Ahmad Razif",
+  name: "Kueh Pang Lang",
   department: "Engineering",
   job_title: "Senior Engineer",
   job_grade: 16,

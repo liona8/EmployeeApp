@@ -26,6 +26,7 @@ export default function ChatbotPage() {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const [threadId, setThreadId] = useState(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -47,13 +48,16 @@ export default function ChatbotPage() {
     try {
       const response = await api.post('/api/ai/chat', {
         message: text.trim(),
-        user_id: 'EMP001'
+        user_id: 'EMP001',
+        thread_id: threadId
       });
+
+      setThreadId(response.data.thread_id);
 
       const aiMsg = {
         id: Date.now() + 1,
         role: "ai",
-        text: response.data.reply,
+        text: String(response.data.reply),
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
       setMessages(prev => [...prev, aiMsg]);
@@ -62,7 +66,7 @@ export default function ChatbotPage() {
       const errMsg = {
         id: Date.now() + 1,
         role: "ai",
-        text: error,
+        text: error.message || "Sorry, something went wrong.",  // ← error.message not error
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
       setMessages(prev => [...prev, errMsg]);
