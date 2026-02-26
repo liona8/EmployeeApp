@@ -45,7 +45,7 @@ jobs:
           output_location: "dist" # Built app content directory - optional
           github_id_token: ${{ steps.idtoken.outputs.result }}
         env:
-          VITE_API_BASE_URL: https://backend-employee-assistant.azurewebsites.net/api
+          VITE_API_BASE_URL: https://backend-employee-assistant-hefweqcmhsh3g2az.canadacentral-01.azurewebsites.net/api
           ###### End of Repository/Build Configurations ######
 
   close_pull_request_job:
@@ -58,3 +58,4 @@ jobs:
         uses: Azure/static-web-apps-deploy@v1
         with:
           action: "close"
+
