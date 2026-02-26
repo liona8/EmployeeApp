@@ -62,7 +62,7 @@ export default function ChatbotPage() {
       const errMsg = {
         id: Date.now() + 1,
         role: "ai",
-        text: "Sorry, I'm having trouble connecting. Please try again.",
+        text: error,
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
       setMessages(prev => [...prev, errMsg]);
