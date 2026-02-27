@@ -7,6 +7,7 @@ import ChatbotPage from './pages/ChatbotPage';
 // import TasksPage from './pages/TasksPage';
 import CalendarPage from './pages/CalendarPage';
 // import DocumentsPage from './pages/DocumentsPage';
+import LeaveManagement from './pages/LeaveManagementPage';
 import './App.css';
 
 export default function App() {
