@@ -1,22 +1,14 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./all.css";
+import { bookingService } from "../services/calanderService";
+import { leaveService} from "../services/leaveService";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const currentUserId = "EMP001";
 
 // Mock events
-const events = {
-  "2026-02-26": [{ type: "leave", label: "Annual Leave", color: "#a78bfa" }],
-  "2026-02-28": [{ type: "booking", label: "Q1 Sprint Planning – Boardroom A", color: "#5b7cfa" }],
-  "2026-03-03": [{ type: "booking", label: "Design Review – Room 3B", color: "#5b7cfa" }],
-  "2026-03-10": [{ type: "leave", label: "Medical Leave", color: "#34d399" }],
-  "2026-03-25": [{ type: "leave", label: "Annual Leave", color: "#a78bfa" }],
-  "2026-03-26": [{ type: "leave", label: "Annual Leave", color: "#a78bfa" }],
-  "2026-03-27": [{ type: "leave", label: "Annual Leave", color: "#a78bfa" }],
-  "2026-03-28": [{ type: "leave", label: "Annual Leave", color: "#a78bfa" }],
-  "2026-03-31": [{ type: "holiday", label: "Hari Raya Aidilfitri", color: "#fb923c" }],
-  "2026-04-01": [{ type: "holiday", label: "Hari Raya Aidilfitri", color: "#fb923c" }],
-};
+const events = {};
 
 function getDaysInMonth(year, month) {
   return new Date(year, month + 1, 0).getDate();
@@ -37,10 +29,67 @@ export default function CalendarPage() {
   const [selectedDay, setSelectedDay] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [booking, setBooking] = useState({ room: "", title: "", time: "", duration: "60" });
+  const [events, setEvents] = useState([]);
 
   const totalDays = getDaysInMonth(currentYear, currentMonth);
   const firstDay = getFirstDay(currentYear, currentMonth);
   const prevDays = getDaysInMonth(currentYear, currentMonth - 1);
+
+    useEffect(() => {
+    const startDate = formatKey(currentYear, currentMonth, 1);
+    const endDate = formatKey(currentYear, currentMonth, getDaysInMonth(currentYear, currentMonth));
+
+    // Fetch bookings
+    bookingService.fetchBookings({ host_user_id: currentUserId, start_date: startDate, end_date: endDate })
+      .then(data => {
+        const mapped = {};
+        data.bookings.forEach(b => {
+          if (!mapped[b.date]) mapped[b.date] = [];
+          mapped[b.date].push({
+            type: "booking",
+            label: b.meeting_title,
+            color: "#5b7cfa"
+          });
+        });
+        setEvents(prev => ({ ...prev, ...mapped }));
+      })
+      .catch(err => console.error(err));
+
+    // Fetch leaves
+    leaveService.getLeaveHistory(currentUserId)
+      .then(data => {
+
+        const leaveArray = data.leaves || data; // 👈 handles both formats
+
+        const mapped = {};
+
+        leaveArray.forEach(l => {
+
+          let current = new Date(l.start_date);
+          const end = new Date(l.end_date);
+
+          while (current <= end) {
+            const key = current.toISOString().split("T")[0];
+
+            if (!mapped[key]) mapped[key] = [];
+
+            mapped[key].push({
+              type: "leave",
+              label: l.leave_type,
+              color: "#a78bfa"
+            });
+
+            current.setDate(current.getDate() + 1);
+          }
+
+        });
+
+        setEvents(prev => ({ ...prev, ...mapped }));
+
+      })
+      .catch(err => console.error(err));
+
+  }, [currentYear, currentMonth]);
 
   const cells = [];
   // Prev month tail
