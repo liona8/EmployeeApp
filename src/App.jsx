@@ -1,4 +1,5 @@
 import React from 'react';
+import { LayoutDashboard, CalendarDays, ClipboardCheck, Bot } from "lucide-react";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useState } from 'react';
 import Dashboard from './pages/Dashboard';
@@ -8,6 +9,7 @@ import ChatbotPage from './pages/ChatbotPage';
 import CalendarPage from './pages/CalendarPage';
 // import DocumentsPage from './pages/DocumentsPage';
 import LeaveManagement from './pages/LeaveManagementPage';
+import ServiceTicketsPage from './pages/ServiceTicketPage';
 import './App.css';
 
 export default function App() {
@@ -15,10 +17,11 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const navItems = [
-    { id: "dashboard", label: "Dashboard", icon: "⊞" },
-    { id: "calendar", label: "Calendar", icon: "◫" },
-    { id: "leave", label: "Leave Management", icon: "◉" },
-    { id: "chat", label: "AI Assistant", icon: "◈" },
+    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { id: "calendar", label: "Calendar", icon: CalendarDays },
+    { id: "chat", label: "AI Assistant", icon: Bot },
+    { id: "leave", label: "Leave Management", icon: ClipboardCheck },
+    { id: "tickets", label: "Service Tickets", icon: ClipboardCheck },
   ];
 
   const renderPage = () => {
@@ -27,6 +30,7 @@ export default function App() {
       case "calendar": return <CalendarPage />;
       case "leave": return <LeaveManagement />;
       case "chat": return <ChatbotPage />;
+      case "tickets": return <ServiceTicketsPage />;
       default: return <Dashboard setActivePage={setActivePage} />;
     }
   };
@@ -41,17 +45,26 @@ export default function App() {
         </div>
 
         <nav className="sidebar-nav">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              className={`nav-item ${activePage === item.id ? "active" : ""}`}
-              onClick={() => setActivePage(item.id)}
-              title={item.label}
-            >
-              <span className="nav-icon">{item.icon}</span>
-              {sidebarOpen && <span className="nav-label">{item.label}</span>}
-            </button>
-          ))}
+          {navItems.map((item) => {
+            const Icon = item.icon;   // 👈 extract component
+
+            return (
+              <button
+                key={item.id}
+                className={`nav-item ${activePage === item.id ? "active" : ""}`}
+                onClick={() => setActivePage(item.id)}
+                title={item.label}
+              >
+                <span className="nav-icon">
+                  <Icon size={18} strokeWidth={1.8} />
+                </span>
+
+                {sidebarOpen && (
+                  <span className="nav-label">{item.label}</span>
+                )}
+              </button>
+            );
+          })}
         </nav>
 
         <div className="sidebar-footer">

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { leaveService } from "../services/leaveService";
 
 const LEAVE_TYPES = [
   { value: "annual_leave", label: "Annual Leave" },
@@ -57,9 +58,34 @@ export default function LeaveManagement() {
   });
   const [submitted, setSubmitted] = useState(false);
   const [validationResult, setValidationResult] = useState(null);
+  const [balanceData, setBalanceData] = useState({});
+  const [historyData, setHistoryData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const workingDays = form.is_half_day ? 0.5 : countWorkingDays(form.start_date, form.end_date);
-  const balance = mockBalance[form.leave_type] || {};
+  const balance = balanceData?.[form.leave_type] || {};
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const userId = "EMP001";
+
+        const balance = await leaveService.getLeaveBalance(userId);
+        setBalanceData(balance);
+
+        // If you have history endpoint
+        const historyRes = await leaveService.getLeaveHistory?.(userId);
+        if (historyRes) setHistoryData(historyRes);
+
+      } catch (err) {
+        console.error(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleSubmit = () => {
     // Mock validation result
@@ -310,12 +336,12 @@ export default function LeaveManagement() {
                 </tr>
               </thead>
               <tbody>
-                {mockHistory.map(l => (
+                {historyData.map(l => (
                   <tr key={l.id}>
                     <td><span style={{ fontFamily: "monospace", fontSize: 12, color: "var(--accent)" }}>{l.id}</span></td>
-                    <td style={{ color: "var(--text)", fontWeight: 500 }}>{l.type}</td>
-                    <td>{l.start} → {l.end}</td>
-                    <td>{l.days}d</td>
+                    <td style={{ color: "var(--text)", fontWeight: 500 }}>{l.leave_type}</td>
+                    <td>{l.start_date} → {l.end_date}</td>
+                    <td>{l.requested_days}d</td>
                     <td>{l.reason}</td>
                     <td>{statusBadge(l.status)}</td>
                   </tr>
@@ -334,7 +360,7 @@ export default function LeaveManagement() {
             { key: "medical_leave", label: "Medical Leave", color: "green", emoji: "🏥" },
             { key: "compassionate_leave", label: "Compassionate Leave", color: "purple", emoji: "❤️" },
           ].map(({ key, label, color, emoji }) => {
-            const b = mockBalance[key] || {};
+            const b = balanceData?.[key] || {};
             const total = b.total_entitlement || b.max_per_year || 9;
             const used = b.used || 0;
             const remaining = b.remaining !== undefined ? b.remaining : total;
