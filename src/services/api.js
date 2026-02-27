@@ -11,7 +11,7 @@ console.log('   - Prod?:', import.meta.env.PROD);
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
-  timeout: 300000,
+  timeout:600000,
 });
 
 // Request interceptor for debugging
