@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { leaveService } from "../services/leaveService";
+import { Calendar, Heart, BriefcaseMedical } from 'lucide-react';
 
 const LEAVE_TYPES = [
   { value: "annual_leave", label: "Annual Leave" },
@@ -356,10 +357,10 @@ export default function LeaveManagement() {
       {tab === "balance" && (
         <div style={{ padding: "0 32px 32px", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
           {[
-            { key: "annual_leave", label: "Annual Leave", color: "blue", emoji: "📅" },
-            { key: "medical_leave", label: "Medical Leave", color: "green", emoji: "🏥" },
-            { key: "compassionate_leave", label: "Compassionate Leave", color: "purple", emoji: "❤️" },
-          ].map(({ key, label, color, emoji }) => {
+            { key: "annual_leave", label: "Annual Leave", color: "blue", icon: <Calendar size={28} /> },
+            { key: "medical_leave", label: "Medical Leave", color: "green", icon: <BriefcaseMedical size={28} /> },
+            { key: "compassionate_leave", label: "Compassionate Leave", color: "purple", icon: <Heart size={28} /> },
+          ].map(({ key, label, color, icon }) => {
             const b = balanceData?.[key] || {};
             const total = b.total_entitlement || b.max_per_year || 9;
             const used = b.used || 0;
@@ -367,7 +368,7 @@ export default function LeaveManagement() {
             const pct = Math.round((used / total) * 100);
             return (
               <div className={`stat-card ${color}`} key={key} style={{ padding: 20 }}>
-                <div style={{ fontSize: 28, marginBottom: 8 }}>{emoji}</div>
+                <div style={{ fontSize: 28, marginBottom: 8 }}>{icon}</div>
                 <div style={{ fontSize: 12, color: "var(--text3)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
                 <div className="font-syne" style={{ fontSize: 36, fontWeight: 800, color: "var(--text)", margin: "6px 0" }}>{remaining}</div>
                 <div style={{ fontSize: 12, color: "var(--text2)", marginBottom: 12 }}>days remaining</div>
