@@ -1,97 +1,98 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { ticketService } from "../services/ticketService";
 
-const mockTickets = [
-  {
-    id: "MT-2026-0001",
-    employee_id: "EMP001",
-    issue_title: "Air conditioning malfunction",
-    description: "The AC in Meeting Room B is not working. Temperature is rising and affecting the work environment. The unit makes a loud clicking noise when switched on but doesn't produce cold air.",
-    category: "AC",
-    priority: "High",
-    location: { room: "Meeting Room B", floor: "5th Floor", building: "HQ Tower" },
-    status: "Open",
-    photo_url: null,
-    created_at: "2026-02-13T10:30:00Z",
-    updated_at: "2026-02-13T10:30:00Z",
-    assigned_to: null,
-    sla_hours: 4,
-  },
-  {
-    id: "MT-2026-0002",
-    employee_id: "EMP001",
-    issue_title: "Flickering lights in pantry",
-    description: "The fluorescent light above the sink has been flickering for 3 days. It flickers every few seconds and is quite distracting during lunch hours.",
-    category: "Lighting",
-    priority: "Medium",
-    location: { room: "Pantry", floor: "5th Floor", building: "HQ Tower" },
-    status: "In Progress",
-    photo_url: null,
-    created_at: "2026-02-10T08:15:00Z",
-    updated_at: "2026-02-11T14:00:00Z",
-    assigned_to: "Maintenance Team B",
-    sla_hours: 8,
-  },
-  {
-    id: "MT-2026-0003",
-    employee_id: "EMP001",
-    issue_title: "Leaking pipe under workstation",
-    description: "Water dripping from the ceiling pipe near workstation 4A. The floor is getting wet and creating a slip hazard.",
-    category: "Plumbing",
-    priority: "High",
-    location: { room: "Open Office – Zone A", floor: "6th Floor", building: "HQ Tower" },
-    status: "Resolved",
-    photo_url: null,
-    created_at: "2026-01-28T13:45:00Z",
-    updated_at: "2026-01-29T09:30:00Z",
-    assigned_to: "Facilities Team A",
-    sla_hours: 4,
-  },
-  {
-    id: "MT-2026-0004",
-    employee_id: "EMP001",
-    issue_title: "Projector HDMI port broken",
-    description: "The HDMI port on the projector in Boardroom A appears to be broken. Cannot connect any laptop to display presentations.",
-    category: "IT",
-    priority: "Medium",
-    location: { room: "Boardroom A", floor: "15th Floor", building: "HQ Tower" },
-    status: "Open",
-    photo_url: null,
-    created_at: "2026-02-20T09:00:00Z",
-    updated_at: "2026-02-20T09:00:00Z",
-    assigned_to: null,
-    sla_hours: 8,
-  },
-  {
-    id: "MT-2026-0005",
-    employee_id: "EMP001",
-    issue_title: "Toilet flush not working",
-    description: "The flush mechanism in cubicle 2 of the male restroom on floor 5 is broken. Needs urgent attention.",
-    category: "Plumbing",
-    priority: "High",
-    location: { room: "Male Restroom", floor: "5th Floor", building: "HQ Tower" },
-    status: "Closed",
-    photo_url: null,
-    created_at: "2026-01-15T11:00:00Z",
-    updated_at: "2026-01-15T16:30:00Z",
-    assigned_to: "Facilities Team A",
-    sla_hours: 4,
-  },
-  {
-    id: "MT-2026-0006",
-    employee_id: "EMP001",
-    issue_title: "Power socket sparking",
-    description: "The power socket near the printer area emits a small spark when plugging in devices. Safety hazard.",
-    category: "Electrical",
-    priority: "High",
-    location: { room: "Print Room", floor: "4th Floor", building: "HQ Tower" },
-    status: "In Progress",
-    photo_url: null,
-    created_at: "2026-02-22T15:10:00Z",
-    updated_at: "2026-02-23T08:00:00Z",
-    assigned_to: "Electrical Team C",
-    sla_hours: 2,
-  },
-];
+// const mockTickets = [
+//   {
+//     id: "MT-2026-0001",
+//     employee_id: "EMP001",
+//     issue_title: "Air conditioning malfunction",
+//     description: "The AC in Meeting Room B is not working. Temperature is rising and affecting the work environment. The unit makes a loud clicking noise when switched on but doesn't produce cold air.",
+//     category: "AC",
+//     priority: "High",
+//     location: { room: "Meeting Room B", floor: "5th Floor", building: "HQ Tower" },
+//     status: "Open",
+//     photo_url: null,
+//     created_at: "2026-02-13T10:30:00Z",
+//     updated_at: "2026-02-13T10:30:00Z",
+//     assigned_to: null,
+//     sla_hours: 4,
+//   },
+//   {
+//     id: "MT-2026-0002",
+//     employee_id: "EMP001",
+//     issue_title: "Flickering lights in pantry",
+//     description: "The fluorescent light above the sink has been flickering for 3 days. It flickers every few seconds and is quite distracting during lunch hours.",
+//     category: "Lighting",
+//     priority: "Medium",
+//     location: { room: "Pantry", floor: "5th Floor", building: "HQ Tower" },
+//     status: "In Progress",
+//     photo_url: null,
+//     created_at: "2026-02-10T08:15:00Z",
+//     updated_at: "2026-02-11T14:00:00Z",
+//     assigned_to: "Maintenance Team B",
+//     sla_hours: 8,
+//   },
+//   {
+//     id: "MT-2026-0003",
+//     employee_id: "EMP001",
+//     issue_title: "Leaking pipe under workstation",
+//     description: "Water dripping from the ceiling pipe near workstation 4A. The floor is getting wet and creating a slip hazard.",
+//     category: "Plumbing",
+//     priority: "High",
+//     location: { room: "Open Office – Zone A", floor: "6th Floor", building: "HQ Tower" },
+//     status: "Resolved",
+//     photo_url: null,
+//     created_at: "2026-01-28T13:45:00Z",
+//     updated_at: "2026-01-29T09:30:00Z",
+//     assigned_to: "Facilities Team A",
+//     sla_hours: 4,
+//   },
+//   {
+//     id: "MT-2026-0004",
+//     employee_id: "EMP001",
+//     issue_title: "Projector HDMI port broken",
+//     description: "The HDMI port on the projector in Boardroom A appears to be broken. Cannot connect any laptop to display presentations.",
+//     category: "IT",
+//     priority: "Medium",
+//     location: { room: "Boardroom A", floor: "15th Floor", building: "HQ Tower" },
+//     status: "Open",
+//     photo_url: null,
+//     created_at: "2026-02-20T09:00:00Z",
+//     updated_at: "2026-02-20T09:00:00Z",
+//     assigned_to: null,
+//     sla_hours: 8,
+//   },
+//   {
+//     id: "MT-2026-0005",
+//     employee_id: "EMP001",
+//     issue_title: "Toilet flush not working",
+//     description: "The flush mechanism in cubicle 2 of the male restroom on floor 5 is broken. Needs urgent attention.",
+//     category: "Plumbing",
+//     priority: "High",
+//     location: { room: "Male Restroom", floor: "5th Floor", building: "HQ Tower" },
+//     status: "Closed",
+//     photo_url: null,
+//     created_at: "2026-01-15T11:00:00Z",
+//     updated_at: "2026-01-15T16:30:00Z",
+//     assigned_to: "Facilities Team A",
+//     sla_hours: 4,
+//   },
+//   {
+//     id: "MT-2026-0006",
+//     employee_id: "EMP001",
+//     issue_title: "Power socket sparking",
+//     description: "The power socket near the printer area emits a small spark when plugging in devices. Safety hazard.",
+//     category: "Electrical",
+//     priority: "High",
+//     location: { room: "Print Room", floor: "4th Floor", building: "HQ Tower" },
+//     status: "In Progress",
+//     photo_url: null,
+//     created_at: "2026-02-22T15:10:00Z",
+//     updated_at: "2026-02-23T08:00:00Z",
+//     assigned_to: "Electrical Team C",
+//     sla_hours: 2,
+//   },
+// ];
 
 const CATEGORY_CONFIG = {
   AC:          { icon: "❄️", color: "#60a5fa", bg: "rgba(96,165,250,0.10)",  border: "rgba(96,165,250,0.22)" },
@@ -432,7 +433,8 @@ function NewTicketModal({ onClose, onSubmit }) {
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function ServiceTicketsPage() {
-  const [tickets, setTickets]       = useState(mockTickets);
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selected, setSelected]     = useState(null);
   const [showNew, setShowNew]       = useState(false);
   const [filterStatus, setStatus]   = useState("All");
@@ -452,6 +454,22 @@ export default function ServiceTicketsPage() {
                   !t.id.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
+
+  useEffect(() => {
+    const fetchTickets = async () => {
+      try {
+        setLoading(true);
+        const data = await ticketService.listEmployeeTickets("EMP001");
+        setTickets(data.tickets);
+      } catch (error) {
+        console.error("Failed to fetch tickets:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTickets();
+  }, []);
 
   const counts = {
     open:       tickets.filter(t => t.status === "Open").length,
@@ -553,6 +571,11 @@ export default function ServiceTicketsPage() {
       </div>
 
       {/* ── Ticket List ── */}
+      {loading && (
+        <div style={{ padding: "32px", textAlign: "center" }}>
+          Loading tickets...
+        </div>
+      )}
       <div style={{ padding: "0 32px 32px", display: "flex", flexDirection: "column", gap: 10 }}>
         {filtered.length === 0 && (
           <div style={{
