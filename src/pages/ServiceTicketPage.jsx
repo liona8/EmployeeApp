@@ -1,13 +1,18 @@
 import { useState, useEffect } from "react";
 import { ticketService } from "../services/ticketService";
+import {
+  Wind, Lightbulb, Droplets, Monitor, Zap, Wrench,
+  Building2, Layers, DoorOpen, Clock, MapPin, Tag,
+  User, Paperclip, AlertTriangle, Search, Plus,
+} from "lucide-react";
 
 const CATEGORY_CONFIG = {
-  AC:          { icon: "❄️", color: "#60a5fa", bg: "rgba(96,165,250,0.10)",  border: "rgba(96,165,250,0.22)" },
-  Lighting:    { icon: "💡", color: "#fbbf24", bg: "rgba(251,191,36,0.10)",  border: "rgba(251,191,36,0.22)" },
-  Plumbing:    { icon: "🚿", color: "#34d399", bg: "rgba(52,211,153,0.10)",  border: "rgba(52,211,153,0.22)" },
-  IT:          { icon: "💻", color: "#a78bfa", bg: "rgba(167,139,250,0.10)", border: "rgba(167,139,250,0.22)" },
-  Electrical:  { icon: "⚡", color: "#fb923c", bg: "rgba(251,146,60,0.10)",  border: "rgba(251,146,60,0.22)" },
-  Other:       { icon: "🔧", color: "#8892aa", bg: "rgba(136,146,170,0.10)", border: "rgba(136,146,170,0.22)" },
+  AC:          { icon: Wind,      color: "#60a5fa", bg: "rgba(96,165,250,0.10)",  border: "rgba(96,165,250,0.22)" },
+  Lighting:    { icon: Lightbulb, color: "#fbbf24", bg: "rgba(251,191,36,0.10)",  border: "rgba(251,191,36,0.22)" },
+  Plumbing:    { icon: Droplets,  color: "#34d399", bg: "rgba(52,211,153,0.10)",  border: "rgba(52,211,153,0.22)" },
+  IT:          { icon: Monitor,   color: "#a78bfa", bg: "rgba(167,139,250,0.10)", border: "rgba(167,139,250,0.22)" },
+  Electrical:  { icon: Zap,       color: "#fb923c", bg: "rgba(251,146,60,0.10)",  border: "rgba(251,146,60,0.22)" },
+  Other:       { icon: Wrench,    color: "#8892aa", bg: "rgba(136,146,170,0.10)", border: "rgba(136,146,170,0.22)" },
 };
 
 const STATUS_CONFIG = {
@@ -73,7 +78,7 @@ function TicketDrawer({ ticket, onClose }) {
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
               <div style={{ padding: "4px 10px", borderRadius: 100, background: cat.bg, border: `1px solid ${cat.border}`, fontSize: 11, fontWeight: 600, color: cat.color, display: "flex", alignItems: "center", gap: 5 }}>
-                <span>{cat.icon}</span> {ticket.category}
+                <cat.icon size={12} strokeWidth={2.2} /> {ticket.category}
               </div>
               <div style={{ padding: "4px 10px", borderRadius: 100, background: pri.bg, fontSize: 11, fontWeight: 600, color: pri.color }}>{ticket.priority}</div>
             </div>
@@ -106,10 +111,14 @@ function TicketDrawer({ ticket, onClose }) {
           <div style={{ background: "var(--bg3)", border: "1px solid var(--border)", borderRadius: 10, padding: "14px 16px" }}>
             <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.06em" }}>Location</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-              {[["🏢 Building", ticket.location.building], ["🏬 Floor", ticket.location.floor], ["🚪 Room", ticket.location.room]].map(([k, v]) => (
-                <div key={k}>
-                  <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 2 }}>{k}</div>
-                  <div style={{ fontSize: 13, color: "var(--text)", fontWeight: 500 }}>{v}</div>
+              {[
+                [<Building2 size={12} />, "Building", ticket.location.building],
+                [<Layers    size={12} />, "Floor",    ticket.location.floor],
+                [<DoorOpen  size={12} />, "Room",     ticket.location.room],
+              ].map(([ico, label, val]) => (
+                <div key={label}>
+                  <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 2, display: "flex", alignItems: "center", gap: 4 }}>{ico} {label}</div>
+                  <div style={{ fontSize: 13, color: "var(--text)", fontWeight: 500 }}>{val}</div>
                 </div>
               ))}
             </div>
@@ -149,8 +158,9 @@ function TicketDrawer({ ticket, onClose }) {
             {ticket.photo_url ? (
               <img src={ticket.photo_url} alt="ticket" style={{ width: "100%", borderRadius: 10, border: "1px solid var(--border)" }} />
             ) : (
-              <div style={{ border: "2px dashed var(--border)", borderRadius: 10, padding: "24px", textAlign: "center", color: "var(--text3)", fontSize: 13 }}>
-                📎 No photo attached
+              <div style={{ border: "2px dashed var(--border)", borderRadius: 10, padding: "24px", textAlign: "center", color: "var(--text3)", fontSize: 13, display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+                <Paperclip size={20} strokeWidth={1.5} />
+                No photo attached
               </div>
             )}
           </div>
@@ -382,8 +392,8 @@ export default function ServiceTicketsPage() {
             <div className="page-title">Service Tickets</div>
             <div className="page-subtitle">Track and manage facility & IT issue reports</div>
           </div>
-          <button className="btn btn-primary btn-sm" onClick={() => setShowNew(true)}>
-            + New Ticket
+          <button className="btn btn-primary btn-sm" onClick={() => setShowNew(true)} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <Plus size={14} strokeWidth={2.5} /> New Ticket
           </button>
         </div>
       </div>
@@ -391,10 +401,10 @@ export default function ServiceTicketsPage() {
       {/* Summary stats */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, padding: "0 32px", marginBottom: 22 }}>
         {[
-          { label: "Open",        val: counts.open,       color: "red",    icon: "🔴" },
-          { label: "In Progress", val: counts.inProgress, color: "orange", icon: "🟡" },
-          { label: "Resolved",    val: counts.resolved,   color: "green",  icon: "🟢" },
-          { label: "Closed",      val: counts.closed,     color: "gray",   icon: "⚫" },
+          { label: "Open",        val: counts.open,       color: "red"    },
+          { label: "In Progress", val: counts.inProgress, color: "orange" },
+          { label: "Resolved",    val: counts.resolved,   color: "green"  },
+          { label: "Closed",      val: counts.closed,     color: "gray"   },
         ].map(s => (
           <div
             key={s.label}
@@ -412,7 +422,10 @@ export default function ServiceTicketsPage() {
 
       {/* Filters */}
       <div style={{ padding: "0 32px", marginBottom: 16, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-        <input className="form-input" style={{ width: 220 }} placeholder="🔍  Search tickets..." value={search} onChange={e => setSearch(e.target.value)} />
+        <div style={{ position: "relative", width: 220 }}>
+          <Search size={14} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "var(--text3)", pointerEvents: "none" }} />
+          <input className="form-input" style={{ width: "100%", paddingLeft: 30 }} placeholder="Search tickets..." value={search} onChange={e => setSearch(e.target.value)} />
+        </div>
         <div style={{ display: "flex", gap: 4 }}>
           {statuses.map(s => {
             const sc = STATUS_CONFIG[s];
@@ -461,8 +474,8 @@ export default function ServiceTicketsPage() {
               onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(91,124,250,0.4)"; e.currentTarget.style.background = "var(--bg3)"; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)";          e.currentTarget.style.background = "var(--bg2)"; }}
             >
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: cat.bg, border: `1px solid ${cat.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>
-                {cat.icon}
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: cat.bg, border: `1px solid ${cat.border}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <cat.icon size={18} color={cat.color} strokeWidth={1.8} />
               </div>
 
               <div style={{ minWidth: 0 }}>
@@ -470,15 +483,27 @@ export default function ServiceTicketsPage() {
                   <span style={{ fontWeight: 600, color: "var(--text)", fontSize: 14 }}>{ticket.issue_title}</span>
                   <span style={{ padding: "2px 8px", borderRadius: 100, background: pri.bg, color: pri.color, fontSize: 11, fontWeight: 600 }}>{ticket.priority}</span>
                   {sla.overdue && (
-                    <span style={{ padding: "2px 8px", borderRadius: 100, background: "rgba(248,113,113,0.1)", color: "#f87171", fontSize: 11, fontWeight: 600 }}>⚠ {sla.label}</span>
+                    <span style={{ padding: "2px 8px", borderRadius: 100, background: "rgba(248,113,113,0.1)", color: "#f87171", fontSize: 11, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                      <AlertTriangle size={10} strokeWidth={2.5} /> {sla.label}
+                    </span>
                   )}
                 </div>
                 <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-                  <span style={{ fontSize: 12, color: "var(--text3)" }}>📍 {ticket.location.room}, {ticket.location.floor}</span>
-                  <span style={{ fontSize: 12, color: "var(--text3)" }}>🏷 {ticket.category}</span>
+                  <span style={{ fontSize: 12, color: "var(--text3)", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                    <MapPin size={11} strokeWidth={2} /> {ticket.location.room}, {ticket.location.floor}
+                  </span>
+                  <span style={{ fontSize: 12, color: "var(--text3)", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                    <Tag size={11} strokeWidth={2} /> {ticket.category}
+                  </span>
                   <span style={{ fontSize: 12, color: "var(--text3)", fontFamily: "monospace" }}>{ticket.id}</span>
-                  <span style={{ fontSize: 12, color: "var(--text3)" }}>🕐 {timeAgo(ticket.created_at)}</span>
-                  {ticket.assigned_to && <span style={{ fontSize: 12, color: "var(--accent3)" }}>👤 {ticket.assigned_to}</span>}
+                  <span style={{ fontSize: 12, color: "var(--text3)", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                    <Clock size={11} strokeWidth={2} /> {timeAgo(ticket.created_at)}
+                  </span>
+                  {ticket.assigned_to && (
+                    <span style={{ fontSize: 12, color: "var(--accent3)", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                      <User size={11} strokeWidth={2} /> {ticket.assigned_to}
+                    </span>
+                  )}
                 </div>
               </div>
 
