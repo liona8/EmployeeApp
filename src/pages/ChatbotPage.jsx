@@ -1,5 +1,6 @@
 // chatbotPage.jsx 
 import { useState, useRef, useEffect } from "react";
+import { Send, Bot, User, Sparkles } from "lucide-react";
 import "./all.css";
 import api from '../services/api';
 
@@ -111,9 +112,10 @@ export default function ChatbotPage() {
           width: 36, height: 36,
           background: "linear-gradient(135deg, var(--accent), var(--accent2))",
           borderRadius: 10,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: 16
-        }}>◈</div>
+          display: "flex", alignItems: "center", justifyContent: "center"
+        }}>
+          <Sparkles size={18} color="white" />
+        </div>
         <div>
           <div className="font-syne" style={{ fontWeight: 700, fontSize: 16, color: "var(--text)" }}>
             Chin Hin AI Assistant
@@ -133,7 +135,10 @@ export default function ChatbotPage() {
         {messages.map((msg) => (
           <div key={msg.id} className={`message ${msg.role}`}>
             <div className={`message-avatar ${msg.role}`}>
-              {msg.role === "ai" ? "AI" : "A"}
+              {msg.role === "ai" 
+                ? <Bot size={16} />
+                : <User size={16} />
+              }
             </div>
             <div>
               <div className="message-bubble">
@@ -189,7 +194,7 @@ export default function ChatbotPage() {
             onClick={() => send(input)}
             disabled={!input.trim() || loading}
           >
-            ↑
+            <Send size={16} />
           </button>
         </div>
         <div style={{ fontSize: 11, color: "var(--text3)", marginTop: 6, textAlign: "center" }}>

@@ -449,6 +449,7 @@ body {
   transition: background 0.15s;
   flex-shrink: 0;
   align-self: flex-end;
+  padding: 0;
 }
 .chat-send-btn:hover { background: #4a6cf0; }
 .chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }

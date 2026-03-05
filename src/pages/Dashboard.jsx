@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { dashboardService } from "../services/dashboard";
 import api from "../services/api";
 import "./all.css";
+import { Calendar, Activity, Star, Hospital, ArrowRight, Users } from "lucide-react";
 
 const statusBadge = (status) => {
   const map = {
@@ -21,68 +23,85 @@ export default function Dashboard({ setActivePage }) {
   const [upcomingBookings, setUpcomingBookings] = useState([]);
   const [activity, setActivity] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  const CACHE_KEY = `dashboard_${userId}`;
+  const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+  const applyDashboardData = (data) => {
+    const today = new Date().toISOString().split("T")[0];
+
+    setEmployee(data.employee || null);
+    setLeaveBalance(data.leaveBalance || null);
+
+    const futureLeaves = (data.leaveHistory || []).filter((l) => l.end_date >= today);
+    setRecentLeaves(futureLeaves.slice(0, 3));
+
+    const futureBookings = (data.bookings || []).filter((b) => b.date >= today);
+    setUpcomingBookings(futureBookings.slice(0, 3));
+
+    const combinedActivity = [
+      ...futureLeaves.map((l) => ({
+        id: `leave-${l.id}`,
+        text: `Leave ${l.id} ${l.status}`,
+        time: l.start_date,
+        color: "#5b7cfa",
+      })),
+      ...futureBookings.map((b) => ({
+        id: `booking-${b.booking_id}`,
+        text: `Room ${b.room_name} booked`,
+        time: b.date,
+        color: "#34d399",
+      })),
+      ...(data.tickets || []).map((t) => ({
+        id: `ticket-${t.id}`,
+        text: `Ticket ${t.id} - ${t.status}`,
+        time: t.created_at,
+        color: "#fb923c",
+      })),
+    ];
+    combinedActivity.sort((a, b) => new Date(b.time) - new Date(a.time));
+    setActivity(combinedActivity.slice(0, 5));
+  };
 
   useEffect(() => {
     const loadDashboard = async () => {
       try {
         setLoading(true);
 
-        // 1️⃣ Employee Info
-        const userRes = await api.get(`/users/${userId}`);
-        setEmployee(userRes?.data || null);
+        // ✅ Check cache first — skip API calls if still fresh
+        const cached = sessionStorage.getItem(CACHE_KEY);
+        if (cached) {
+          const { data, timestamp } = JSON.parse(cached);
+          if (Date.now() - timestamp < CACHE_TTL) {
+            applyDashboardData(data);
+            setLoading(false);
+            return;
+          }
+        }
 
-        // 2️⃣ Leave Balance
-        const leaveRes = await dashboardService.getLeaveBalance(userId);
-        setLeaveBalance(leaveRes || null);
-
-        // 3️⃣ Leave History — only show future/ongoing leaves
-        const historyResRaw = await dashboardService.getLeaveHistory(userId);
-        const historyRes = Array.isArray(historyResRaw) ? historyResRaw : [];
+        // 🌐 Cache miss — fetch all in parallel
         const today = new Date().toISOString().split("T")[0];
-        const futureLeaves = historyRes.filter((l) => l.end_date >= today);
-        setRecentLeaves(futureLeaves.slice(0, 3));
+        const [userRes, leaveRes, historyResRaw, bookingRes, ticketsRaw] = await Promise.all([
+          api.get(`/users/${userId}`),
+          dashboardService.getLeaveBalance(userId),
+          dashboardService.getLeaveHistory(userId),
+          dashboardService.getBookingDetails(null, userId, today, null),
+          dashboardService.listEmployeeTickets(userId),
+        ]);
 
-        // 4️⃣ Upcoming Bookings — only show future bookings
-        const bookingRes = await dashboardService.getBookingDetails(
-          null,
-          userId,
-          today,
-          null
-        );
-        const bookingsArray = Array.isArray(bookingRes)
-          ? bookingRes
-          : bookingRes?.bookings || [];
-        const futureBookings = bookingsArray.filter((b) => b.date >= today);
-        setUpcomingBookings(futureBookings.slice(0, 3));
+        const data = {
+          employee: userRes?.data || null,
+          leaveBalance: leaveRes || null,
+          leaveHistory: Array.isArray(historyResRaw) ? historyResRaw : [],
+          bookings: Array.isArray(bookingRes) ? bookingRes : bookingRes?.bookings || [],
+          tickets: Array.isArray(ticketsRaw) ? ticketsRaw : [],
+        };
 
-        // 5️⃣ Tickets
-        const ticketsRaw = await dashboardService.listEmployeeTickets(userId);
-        const tickets = Array.isArray(ticketsRaw) ? ticketsRaw : [];
+        // 💾 Save to cache
+        sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
 
-        // 6️⃣ Build Activity Feed
-        const combinedActivity = [
-          ...futureLeaves.map((l) => ({
-            id: `leave-${l.id}`,
-            text: `Leave ${l.id} ${l.status}`,
-            time: l.start_date,
-            color: "#5b7cfa",
-          })),
-          ...futureBookings.map((b) => ({
-            id: `booking-${b.booking_id}`,
-            text: `Room ${b.room_name} booked`,
-            time: b.date,
-            color: "#34d399",
-          })),
-          ...tickets.map((t) => ({
-            id: `ticket-${t.id}`,
-            text: `Ticket ${t.id} - ${t.status}`,
-            time: t.created_at,
-            color: "#fb923c",
-          })),
-        ];
-
-        combinedActivity.sort((a, b) => new Date(b.time) - new Date(a.time));
-        setActivity(combinedActivity.slice(0, 5));
+        applyDashboardData(data);
       } catch (error) {
         console.error("Dashboard load error:", error);
       } finally {
@@ -120,25 +139,25 @@ export default function Dashboard({ setActivePage }) {
       {/* Stats */}
       <div className="stat-grid">
         <div className="stat-card blue">
-          <div className="stat-icon">📅</div>
+          <div className="stat-icon"><Calendar size={20} /></div>
           <div className="stat-label">Annual Leave</div>
           <div className="stat-value">{leaveBalance?.annual_leave?.remaining}</div>
           <div className="stat-sub">days remaining of {leaveBalance?.annual_leave?.total_entitlement}</div>
         </div>
         <div className="stat-card green">
-          <div className="stat-icon">🏥</div>
+          <div className="stat-icon"><Hospital size={20} /></div>
           <div className="stat-label">Medical Leave</div>
           <div className="stat-value">{leaveBalance?.medical_leave?.remaining}</div>
           <div className="stat-sub">days remaining of {leaveBalance?.medical_leave?.total_entitlement}</div>
         </div>
         <div className="stat-card purple">
-          <div className="stat-icon">↩</div>
+          <div className="stat-icon"><ArrowRight size={20} /></div>
           <div className="stat-label">Carry Forward</div>
           <div className="stat-value">{leaveBalance?.annual_leave?.carry_forward_from_previous}</div>
           <div className="stat-sub">days from 2025 · expires Jun 30</div>
         </div>
         <div className="stat-card orange">
-          <div className="stat-icon">⭐</div>
+          <div className="stat-icon"><Star size={20} /></div>
           <div className="stat-label">Years of Service</div>
           <div className="stat-value">{employee?.years_of_service}</div>
           <div className="stat-sub">Grade {employee?.job_grade} · {employee?.employment_status}</div>
@@ -170,7 +189,7 @@ export default function Dashboard({ setActivePage }) {
                   <tr key={l.id}>
                     <td><span style={{ color: "var(--text)", fontWeight: 500 }}>{l.leave_type}</span></td>
                     <td>{l.start_date} → {l.end_date}</td>
-                    <td>{l.duration_days}d</td>
+                    <td>{l.requested_days}d</td>
                     <td>{statusBadge(l.status)}</td>
                   </tr>
                 )) : (
@@ -233,7 +252,7 @@ export default function Dashboard({ setActivePage }) {
             <button
               className="btn btn-ghost btn-sm mt-16"
               style={{ width: "100%", justifyContent: "center" }}
-              onClick={() => setActivePage("leave")}
+              onClick={() => navigate("/leave")}
             >
               Apply for Leave →
             </button>
@@ -260,15 +279,15 @@ export default function Dashboard({ setActivePage }) {
             <div className="card-title">Quick Actions</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {[
-                { label: "🗓  Apply for Leave", page: "leave" },
-                { label: "🏢  Book a Meeting Room", page: "calendar" },
-                { label: "🤖  Ask AI Assistant", page: "chat" },
+                { label: <><Calendar size={16} /> Apply for Leave</>, page: "/leave" },
+                { label: <><Users size={16} /> Book a Meeting Room</>, page: "/calendar" },
+                { label: <><Activity size={16} /> Ask AI Assistant</>, page: "/chat" },
               ].map((a) => (
                 <button
                   key={a.page}
                   className="btn btn-ghost"
                   style={{ justifyContent: "flex-start" }}
-                  onClick={() => setActivePage(a.page)}
+                  onClick={() => navigate(a.page)}
                 >
                   {a.label}
                 </button>

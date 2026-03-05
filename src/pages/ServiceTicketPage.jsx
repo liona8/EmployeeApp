@@ -202,7 +202,7 @@ function TicketDrawer({ ticket, onClose }) {
               </div>
             </div>
             <div style={{
-              fontFamily: "'Syne', sans-serif",
+              fontFamily: "'Poppins', sans-serif",
               fontSize: 17, fontWeight: 700, color: "var(--text)", lineHeight: 1.35,
             }}>
               {ticket.issue_title}

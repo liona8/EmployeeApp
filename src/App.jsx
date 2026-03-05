@@ -1,92 +1,48 @@
-import React from 'react';
-import { LayoutDashboard, CalendarDays, ClipboardCheck, Bot } from "lucide-react";
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useState } from 'react';
-import Dashboard from './pages/Dashboard';
-import ChatbotPage from './pages/ChatbotPage';
-// import HRPage from './pages/HRPage';
-// import TasksPage from './pages/TasksPage';
-import CalendarPage from './pages/CalendarPage';
-// import DocumentsPage from './pages/DocumentsPage';
-import LeaveManagement from './pages/LeaveManagementPage';
-import ServiceTicketsPage from './pages/ServiceTicketPage';
-import './App.css';
+import React, { useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Dashboard from "./pages/Dashboard";
+import ChatbotPage from "./pages/ChatbotPage";
+import CalendarPage from "./pages/CalendarPage";
+import LeaveManagement from "./pages/LeaveManagementPage";
+import ServiceTicketsPage from "./pages/ServiceTicketPage";
+import LoginPage from "./pages/login";
+import Layout from "../src/components/layout/Layout";
+
+import "./App.css";
 
 export default function App() {
-  const [activePage, setActivePage] = useState("dashboard");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-
-  const navItems = [
-    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { id: "calendar", label: "Calendar", icon: CalendarDays },
-    { id: "chat", label: "AI Assistant", icon: Bot },
-    { id: "leave", label: "Leave Management", icon: ClipboardCheck },
-    { id: "tickets", label: "Service Tickets", icon: ClipboardCheck },
-  ];
-
-  const renderPage = () => {
-    switch (activePage) {
-      case "dashboard": return <Dashboard setActivePage={setActivePage} />;
-      case "calendar": return <CalendarPage />;
-      case "leave": return <LeaveManagement />;
-      case "chat": return <ChatbotPage />;
-      case "tickets": return <ServiceTicketsPage />;
-      default: return <Dashboard setActivePage={setActivePage} />;
-    }
-  };
+  // const [isAuthenticated, setIsAuthenticated] = useState(
+  //   localStorage.getItem("token") ? true : false
+  // );
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    // Check sessionStorage on first render
+    return !!sessionStorage.getItem("session");
+  });
 
   return (
-    <div className="app-root">
-      {/* Sidebar */}
-      <aside className={`sidebar ${sidebarOpen ? "open" : "collapsed"}`}>
-        <div className="sidebar-brand">
-          <div className="brand-mark">CH</div>
-          {sidebarOpen && <span className="brand-name">Chin Hin</span>}
-        </div>
+    <Router>
+      <Routes>
 
-        <nav className="sidebar-nav">
-          {navItems.map((item) => {
-            const Icon = item.icon;   // 👈 extract component
+        {/* Login */}
+        <Route
+          path="/login"
+          element={<LoginPage setIsAuthenticated={setIsAuthenticated} />}
+        />
 
-            return (
-              <button
-                key={item.id}
-                className={`nav-item ${activePage === item.id ? "active" : ""}`}
-                onClick={() => setActivePage(item.id)}
-                title={item.label}
-              >
-                <span className="nav-icon">
-                  <Icon size={18} strokeWidth={1.8} />
-                </span>
+        {/* Protected Layout */}
+        {isAuthenticated ? (
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="calendar" element={<CalendarPage />} />
+            <Route path="leave" element={<LeaveManagement />} />
+            <Route path="chat" element={<ChatbotPage />} />
+            <Route path="tickets" element={<ServiceTicketsPage />} />
+          </Route>
+        ) : (
+          <Route path="*" element={<Navigate to="/login" />} />
+        )}
 
-                {sidebarOpen && (
-                  <span className="nav-label">{item.label}</span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
-
-        <div className="sidebar-footer">
-          <div className="user-avatar-mini">
-            <div className="avatar-circle">A</div>
-            {sidebarOpen && (
-              <div className="user-info-mini">
-                <span className="user-name-mini">Kueh Pang Lang</span>
-                <span className="user-id-mini">EMP001</span>
-              </div>
-            )}
-          </div>
-          <button className="collapse-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
-            {sidebarOpen ? "←" : "→"}
-          </button>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="main-content">
-        {renderPage()}
-      </main>
-    </div>
+      </Routes>
+    </Router>
   );
 }
