@@ -1,4 +1,5 @@
 import api from './api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 export const leaveService = {
 
@@ -24,6 +25,20 @@ export const leaveService = {
       console.error('Error fetching leave history:', error.message);
       throw error;
     }
+  },
+
+  applyLeave: async (payload) => {
+    const res = await fetch(`${API_BASE}/leave/apply`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      // Backend returns { detail: { errors: [...], warnings: [...] } } on 400
+      throw { status: res.status, detail: data.detail };
+    }
+    return data;
   },
 
   // Optional: calculate entitlement comparison

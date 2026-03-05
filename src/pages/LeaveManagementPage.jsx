@@ -8,20 +8,7 @@ const LEAVE_TYPES = [
   { value: "compassionate_leave", label: "Compassionate Leave" },
   { value: "paternity_leave", label: "Paternity Leave" },
   { value: "maternity_leave", label: "Maternity Leave" },
-  { value: "unpaid_leave", label: "Unpaid Leave" },
 ];
-
-const mockHistory = [
-  { id: "LA-2026-A1B2C", type: "Annual Leave", start: "2026-01-15", end: "2026-01-17", days: 3, status: "approved", reason: "Family vacation" },
-  { id: "LA-2026-D3E4F", type: "Medical Leave", start: "2026-02-10", end: "2026-02-10", days: 1, status: "approved", reason: "Fever" },
-  { id: "LA-2026-G5H6I", type: "Annual Leave", start: "2026-03-25", end: "2026-03-28", days: 4, status: "pending_approval", reason: "Break" },
-];
-
-const mockBalance = {
-  annual_leave: { total_entitlement: 18, used: 5, remaining: 13, carry_forward_from_previous: 3, carry_forward_expiry_date: "2026-06-30" },
-  medical_leave: { total_entitlement: 14, used: 2, remaining: 12 },
-  compassionate_leave: { max_per_year: 9, used: 0, remaining: 9 },
-};
 
 const statusBadge = (status) => {
   const map = {
@@ -66,6 +53,52 @@ export default function LeaveManagement() {
   const workingDays = form.is_half_day ? 0.5 : countWorkingDays(form.start_date, form.end_date);
   const balance = balanceData?.[form.leave_type] || {};
 
+  const validateForm = () => {
+    const errors = [];
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const start = form.start_date ? new Date(form.start_date) : null;
+    const end = form.end_date ? new Date(form.end_date) : null;
+
+    if (!form.start_date) errors.push("Start date is required.");
+    if (!form.end_date) errors.push("End date is required.");
+
+    if (start && start < today) {
+      errors.push("Start date cannot be in the past.");
+    }
+
+    if (start && end && end < start) {
+      errors.push("End date cannot be earlier than start date.");
+    }
+
+    if (
+      form.leave_type === "compassionate_leave" &&
+      !form.relationship
+    ) {
+      errors.push("Please select relationship for compassionate leave.");
+    }
+
+    const requestedDays = form.is_half_day
+      ? 0.5
+      : countWorkingDays(form.start_date, form.end_date);
+
+    const currentBalance = balanceData?.[form.leave_type]?.remaining ?? 0;
+
+    if (requestedDays <= 0) {
+      errors.push("Invalid leave duration.");
+    }
+
+    if (requestedDays > currentBalance) {
+      errors.push(
+        `Requested ${requestedDays} day(s) exceeds your remaining balance of ${currentBalance}.`
+      );
+    }
+
+    return errors;
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -88,33 +121,84 @@ export default function LeaveManagement() {
     fetchData();
   }, []);
 
-  const handleSubmit = () => {
-    // Mock validation result
-    const errors = [];
-    const warnings = [];
+  const handleSubmit = async () => {
+    setLoading(true);
+    setValidationResult(null);
 
-    if (!form.start_date || !form.end_date) {
-      errors.push("Start date and end date are required.");
-    }
-    if (workingDays > (balance.remaining ?? 99)) {
-      errors.push(`Insufficient leave balance. Requested: ${workingDays} days, Available: ${balance.remaining}`);
-    }
-    if (form.leave_type === "annual_leave" && !form.is_half_day) {
-      const daysNotice = Math.floor((new Date(form.start_date) - new Date()) / 86400000);
-      if (daysNotice < 5) errors.push(`Annual leave requires minimum 5 working days advance notice. Current: ${daysNotice} days.`);
-    }
-    if (form.leave_type === "compassionate_leave" && !form.relationship) {
-      errors.push("Compassionate leave requires a relationship to be specified.");
-    }
-    if (form.leave_type === "medical_leave") {
-      warnings.push("A valid medical certificate is required upon return.");
-    }
-    if (form.leave_type === "annual_leave" && balance.carry_forward_from_previous > 0) {
-      warnings.push(`You have ${balance.carry_forward_from_previous} carry-forward days expiring on ${balance.carry_forward_expiry_date}. These will be used first.`);
+    const formErrors = validateForm();
+    if (formErrors.length > 0) {
+      setValidationResult({
+        is_valid: false,
+        errors: formErrors,
+        warnings: [],
+      });
+      setLoading(false);
+      return;
     }
 
-    setValidationResult({ errors, warnings, is_valid: errors.length === 0, days: workingDays });
-    if (errors.length === 0) setSubmitted(true);
+    setLoading(true);
+
+    // Build payload matching your backend's /leave/apply expected body
+    const payload = {
+      employee_id: "EMP001",            // replace with auth user ID
+      leave_type: form.leave_type,
+      start_date: form.start_date,
+      end_date: form.end_date,
+      reason: form.reason || "Not specified",   // backend requires reason
+      is_half_day: form.is_half_day,
+      half_day_period: form.is_half_day ? form.half_day_period : null,
+      emergency: form.emergency,
+      relationship: form.relationship || null,
+      supporting_documents: [],
+    };
+
+    try {
+      const result = await leaveService.applyLeave(payload);
+
+      // Success — result.validation_summary has warnings
+      setValidationResult({
+        is_valid: true,
+        warnings: result.validation_summary?.warnings || [],
+        errors: [],
+        leave_id: result.leave_id,
+      });
+      setSubmitted(true);
+
+      // Refresh balance after successful submission
+      const updatedBalance = await leaveService.getLeaveBalance("EMP001");
+      setBalanceData(updatedBalance);
+
+      // Optionally refresh history
+      const updatedHistory = await leaveService.getLeaveHistory("EMP001");
+      if (updatedHistory) setHistoryData(updatedHistory);
+
+    } catch (err) {
+      console.log("Full error:", err);
+
+      if (err.detail?.errors) {
+        setValidationResult({
+          is_valid: false,
+          errors: err.detail.errors,
+          warnings: err.detail.warnings || [],
+        });
+
+      } else if (err.detail?.message) {
+        setValidationResult({
+          is_valid: false,
+          errors: [err.detail.message],
+          warnings: [],
+        });
+
+      } else {
+        setValidationResult({
+          is_valid: false,
+          errors: ["An unexpected error occurred. Please try again."],
+          warnings: [],
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const reset = () => {
