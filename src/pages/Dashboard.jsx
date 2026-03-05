@@ -15,6 +15,24 @@ const statusBadge = (status) => {
   return <span className={`badge ${cls}`}>{label}</span>;
 };
 
+const formatDate = (dateStr) => {
+  if (!dateStr) return "-";
+  return new Date(dateStr).toLocaleDateString("en-MY", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const formatTime = (dateStr) => {
+  if (!dateStr) return "-";
+  return new Date(dateStr).toLocaleTimeString("en-MY", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
+
 export default function Dashboard({ setActivePage }) {
   const userId = "EMP001";
   const [employee, setEmployee] = useState(null);
@@ -214,7 +232,9 @@ export default function Dashboard({ setActivePage }) {
               }}>
                 <div>
                   <div style={{ fontWeight: 500, color: "var(--text)", fontSize: 13 }}>{b.title}</div>
-                  <div style={{ fontSize: 12, color: "var(--text3)", marginTop: 2 }}>{b.room_name} · {b.start_time} – {b.end_time}</div>
+                  <div style={{ fontSize: 12, color: "var(--text3)", marginTop: 2 }}>
+                    {b.room_name} · {formatDate(b.date)} · {formatTime(b.start_time)} – {formatTime(b.end_time)}
+                  </div>
                 </div>
                 <div style={{ fontSize: 12, color: "var(--text2)", textAlign: "right" }}>
                   <div style={{ color: "var(--accent)", fontWeight: 500 }}>{b.date}</div>
