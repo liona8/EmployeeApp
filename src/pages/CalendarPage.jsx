@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "./all.css";
-import { bookingService } from "../services/calanderService";
+import { calanderService } from "../services/calanderService";
 import { leaveService} from "../services/leaveService";
 import { roomService } from "../services/roomService";
+import { bookingService } from "../services/bookingService";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -59,7 +60,7 @@ export default function CalendarPage() {
     const endDate = formatKey(currentYear, currentMonth, getDaysInMonth(currentYear, currentMonth));
 
     // Fetch bookings
-    bookingService.fetchBookings({ host_user_id: currentUserId, start_date: startDate, end_date: endDate })
+    calanderService.fetchBookings({ host_user_id: currentUserId, start_date: startDate, end_date: endDate })
       .then(data => {
         const mapped = {};
         data.bookings.forEach(b => {
