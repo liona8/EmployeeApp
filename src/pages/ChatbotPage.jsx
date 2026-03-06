@@ -1,6 +1,6 @@
 // chatbotPage.jsx 
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Sparkles } from "lucide-react";
+import { Send, Bot, User, Sparkles, Camera, X } from "lucide-react";
 import "./all.css";
 import api from '../services/api';
 
@@ -29,19 +29,83 @@ export default function ChatbotPage() {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const [threadId, setThreadId] = useState(null);
+  
+  // Photo upload state
+  const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
+  // Photo upload handler
+  const handlePhotoUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size must be less than 5MB');
+      return;
+    }
+
+    // Show preview
+    const reader = new FileReader();
+    reader.onload = (e) => setPhotoPreview(e.target.result);
+    reader.readAsDataURL(file);
+
+    // Upload to backend
+    const formData = new FormData();
+    formData.append('file', file);
+
+    setUploadingPhoto(true);
+
+    try {
+      const response = await api.post('/service-ticket/upload-photo', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      setUploadedPhotoUrl(response.data.photo_url);
+    } catch (err) {
+      const msg = err?.response?.data?.detail || err.message || 'Photo upload failed';
+      alert(typeof msg === 'string' ? msg : JSON.stringify(msg));
+      setPhotoPreview(null);
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const clearPhoto = () => {
+    setPhotoPreview(null);
+    setUploadedPhotoUrl(null);
+  };
+
   const send = async (text) => {
-    if (!text.trim() || loading) return;
+    if ((!text.trim() && !uploadedPhotoUrl) || loading) return;
+    
+    // Build message text including photo mention
+    let messageText = text.trim();
+    if (uploadedPhotoUrl && messageText) {
+      messageText = messageText + "\n\n[Photo attached]";
+    } else if (uploadedPhotoUrl) {
+      messageText = "[Photo attached]";
+    }
     
     const userMsg = {
       id: Date.now(),
       role: "user",
-      text: text.trim(),
+      text: messageText,
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      photo_url: uploadedPhotoUrl,
     };
     setMessages(prev => [...prev, userMsg]);
     setInput("");
@@ -51,7 +115,8 @@ export default function ChatbotPage() {
       const response = await api.post('/api/ai/chat', {
         message: text.trim(),
         user_id: 'EMP001',
-        thread_id: threadId
+        thread_id: threadId,
+        photo_url: uploadedPhotoUrl,
       });
 
       setThreadId(response.data.thread_id);
@@ -68,12 +133,15 @@ export default function ChatbotPage() {
       const errMsg = {
         id: Date.now() + 1,
         role: "ai",
-        text: error.message || "Sorry, something went wrong.",  // ← error.message not error
+        text: error.message || "Sorry, something went wrong.",
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
       setMessages(prev => [...prev, errMsg]);
     } finally {
       setLoading(false);
+      // Clear photo after sending
+      setUploadedPhotoUrl(null);
+      setPhotoPreview(null);
     }
   };
 
@@ -179,7 +247,58 @@ export default function ChatbotPage() {
 
       {/* Input */}
       <div className="chat-input-area">
+        {/* Photo Preview */}
+        {photoPreview && (
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 10, 
+            marginBottom: 10,
+            padding: '8px 12px',
+            background: 'var(--bg3)',
+            borderRadius: 8,
+            border: '1px solid var(--border)'
+          }}>
+            <img 
+              src={photoPreview} 
+              alt="Preview" 
+              style={{ width: 50, height: 50, objectFit: 'cover', borderRadius: 6 }} 
+            />
+            <div style={{ flex: 1, fontSize: 12, color: 'var(--text2)' }}>
+              {uploadingPhoto ? 'Uploading...' : (uploadedPhotoUrl ? 'Photo ready' : 'Processing...')}
+            </div>
+            <button
+              onClick={clearPhoto}
+              style={{
+                background: 'rgba(248,113,113,0.9)',
+                border: 'none',
+                borderRadius: '50%',
+                width: 24,
+                height: 24,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                color: 'white'
+              }}
+              title="Remove photo"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        )}
+        
         <div className="chat-input-wrap">
+          {/* Hidden file input */}
+          <input
+            type="file"
+            id="chatPhotoInput"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={handlePhotoUpload}
+            disabled={uploadingPhoto}
+          />
+          
           <textarea
             ref={inputRef}
             className="chat-input"
@@ -189,10 +308,36 @@ export default function ChatbotPage() {
             onKeyDown={handleKey}
             rows={1}
           />
+          
+          {/* Camera button - beside send button */}
+          <button
+            onClick={() => document.getElementById('chatPhotoInput').click()}
+            disabled={uploadingPhoto}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--text2)',
+              cursor: uploadingPhoto ? 'not-allowed' : 'pointer',
+              padding: '8px 10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: uploadingPhoto ? 0.5 : 1,
+              borderRadius: 8,
+              transition: 'background 0.15s',
+              marginRight: 4,
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg3)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            title="Add photo"
+          >
+            <Camera size={20} />
+          </button>
+          
           <button
             className="chat-send-btn"
             onClick={() => send(input)}
-            disabled={!input.trim() || loading}
+            disabled={(!input.trim() && !uploadedPhotoUrl) || loading}
           >
             <Send size={16} />
           </button>

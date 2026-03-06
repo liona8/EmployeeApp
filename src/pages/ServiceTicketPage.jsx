@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { ticketService } from "../services/ticketService";
+import api from "../services/api";
 import {
   Wind, Lightbulb, Droplets, Monitor, Zap, Wrench,
   Building2, Layers, DoorOpen, Clock, MapPin, Tag,
-  User, Paperclip, AlertTriangle, Search, Plus,
+  User, Paperclip, AlertTriangle, Search, Plus, Camera, X
 } from "lucide-react";
 
 const CATEGORY_CONFIG = {
@@ -199,6 +200,11 @@ function NewTicketModal({ onClose, onSuccess }) {
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError]           = useState(null);
+  
+  // Photo upload state
+  const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   const up = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -210,6 +216,57 @@ function NewTicketModal({ onClose, onSuccess }) {
 
   const floorDisplay = form.floorNum ? formatFloor(form.floorNum) : "";
   const valid = form.issue_title && form.description && form.room && form.floorNum;
+
+  // Photo upload handler
+  const handlePhotoUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setError('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image size must be less than 5MB');
+      return;
+    }
+
+    // Show preview
+    const reader = new FileReader();
+    reader.onload = (e) => setPhotoPreview(e.target.result);
+    reader.readAsDataURL(file);
+
+    // Upload to backend
+    const formData = new FormData();
+    formData.append('file', file);
+
+    setUploadingPhoto(true);
+    setError(null);
+
+    try {
+      const response = await api.post('/service-ticket/upload-photo', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      setUploadedPhotoUrl(response.data.photo_url);
+    } catch (err) {
+      const msg = err?.response?.data?.detail || err.message || 'Photo upload failed';
+      setError(typeof msg === 'string' ? msg : JSON.stringify(msg));
+      setPhotoPreview(null);
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const clearPhoto = () => {
+    setPhotoPreview(null);
+    setUploadedPhotoUrl(null);
+  };
 
   const handleSubmit = async () => {
     if (!valid || submitting) return;
@@ -229,7 +286,7 @@ function NewTicketModal({ onClose, onSuccess }) {
           floor:    floorDisplay,
           building: form.building,
         },
-        photo_url: null,
+        photo_url: uploadedPhotoUrl,
       });
 
       // Pass the real ticket back up to the list
@@ -316,6 +373,86 @@ function NewTicketModal({ onClose, onSuccess }) {
           <input className="form-input" value={form.building} onChange={e => up("building", e.target.value)} />
         </div>
 
+        {/* Photo Upload Section */}
+        <div className="form-group">
+          <label className="form-label">Attachment (Optional)</label>
+          
+          {/* Hidden file input */}
+          <input
+            type="file"
+            id="photoInput"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={handlePhotoUpload}
+            disabled={uploadingPhoto}
+          />
+          
+          {/* Photo preview or upload button */}
+          {photoPreview ? (
+            <div style={{ 
+              position: 'relative', 
+              display: 'inline-block',
+              border: '1px solid var(--border)',
+              borderRadius: 10,
+              padding: 8,
+              background: 'var(--bg3)'
+            }}>
+              <img 
+                src={photoPreview} 
+                alt="Preview" 
+                style={{ maxWidth: '200px', maxHeight: '150px', borderRadius: 8, display: 'block' }} 
+              />
+              <button
+                onClick={clearPhoto}
+                style={{
+                  position: 'absolute',
+                  top: 4,
+                  right: 4,
+                  background: 'rgba(248,113,113,0.9)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: 24,
+                  height: 24,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: 'white'
+                }}
+                title="Remove photo"
+              >
+                <X size={14} />
+              </button>
+              {uploadedPhotoUrl && (
+                <div style={{ fontSize: 11, color: 'var(--accent3)', marginTop: 6, textAlign: 'center' }}>
+                  Photo uploaded successfully
+                </div>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={() => document.getElementById('photoInput').click()}
+              disabled={uploadingPhoto}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '10px 16px',
+                background: 'var(--bg3)',
+                border: '1px dashed var(--border)',
+                borderRadius: 8,
+                color: 'var(--text2)',
+                cursor: uploadingPhoto ? 'not-allowed' : 'pointer',
+                fontSize: 13,
+                opacity: uploadingPhoto ? 0.6 : 1
+              }}
+            >
+              <Camera size={16} />
+              {uploadingPhoto ? 'Uploading...' : 'Add Photo'}
+            </button>
+          )}
+        </div>
+
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 4 }}>
           <button className="btn btn-ghost" onClick={onClose} disabled={submitting}>Cancel</button>
           <button
@@ -347,12 +484,13 @@ export default function ServiceTicketsPage() {
   const categories = ["All", ...Object.keys(CATEGORY_CONFIG)];
   const priorities = ["All", "High", "Medium", "Low"];
 
-  const filtered = tickets.filter(t => {
+  const filtered = (tickets || []).filter(t => {
+    if (!t) return false;
     if (filterStatus !== "All" && t.status   !== filterStatus) return false;
     if (filterCat    !== "All" && t.category !== filterCat)    return false;
     if (filterPri    !== "All" && t.priority !== filterPri)    return false;
-    if (search && !t.issue_title.toLowerCase().includes(search.toLowerCase()) &&
-                  !t.id.toLowerCase().includes(search.toLowerCase())) return false;
+    if (search && !t.issue_title?.toLowerCase().includes(search.toLowerCase()) &&
+                  !t.id?.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
 
@@ -361,9 +499,12 @@ export default function ServiceTicketsPage() {
       try {
         setLoading(true);
         const data = await ticketService.listEmployeeTickets("EMP001");
-        setTickets(data.tickets);
+        // Handle different response structures defensively
+        const ticketList = data?.tickets || data || [];
+        setTickets(Array.isArray(ticketList) ? ticketList : []);
       } catch (error) {
         console.error("Failed to fetch tickets:", error);
+        setTickets([]);
       } finally {
         setLoading(false);
       }
@@ -372,10 +513,10 @@ export default function ServiceTicketsPage() {
   }, []);
 
   const counts = {
-    open:       tickets.filter(t => t.status === "Open").length,
-    inProgress: tickets.filter(t => t.status === "In Progress").length,
-    resolved:   tickets.filter(t => t.status === "Resolved").length,
-    closed:     tickets.filter(t => t.status === "Closed").length,
+    open:       (tickets || []).filter(t => t?.status === "Open").length,
+    inProgress: (tickets || []).filter(t => t?.status === "In Progress").length,
+    resolved:   (tickets || []).filter(t => t?.status === "Resolved").length,
+    closed:     (tickets || []).filter(t => t?.status === "Closed").length,
   };
 
   // Called after a successful API create — prepend the real ticket from the DB
