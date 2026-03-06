@@ -144,7 +144,7 @@ export default function Dashboard({ setActivePage }) {
       <div className="page-header">
         <div className="flex-between">
           <div>
-            <div className="page-title">Good morning, {employee?.name?.split(" ")[0]} 👋</div>
+            <div className="page-title">Good morning, Kueh👋</div>
             <div className="page-subtitle">{employee?.job_title} · {employee?.department}</div>
           </div>
           <div className="flex-gap">

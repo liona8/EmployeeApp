@@ -20,9 +20,18 @@ export default function Layout() {
     <div className="app-root">
       {/* Sidebar */}
       <aside className={`sidebar ${sidebarOpen ? "open" : "collapsed"}`}>
-        <div className="sidebar-brand">
-          <div className="brand-mark">CH</div>
-          {sidebarOpen && <span className="brand-name">Chin Hin</span>}
+        <div className="sidebar-brand" style={{ justifyContent: 'center', padding: '16px 12px' }}>
+          <img 
+            src="/chg_logo.png" 
+            alt="Logo" 
+            className="brand-logo" 
+            style={{ 
+              width: sidebarOpen ? '80%' : '32px', 
+              height: 'auto', 
+              borderRadius: 8,
+              transition: 'width 0.3s ease'
+            }} 
+          />
         </div>
 
         <nav className="sidebar-nav">
