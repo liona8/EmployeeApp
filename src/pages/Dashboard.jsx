@@ -3,7 +3,24 @@ import { useNavigate } from "react-router-dom";
 import { dashboardService } from "../services/dashboard";
 import api from "../services/api";
 import "./all.css";
-import { Calendar, Activity, Star, Hospital, ArrowRight, Users } from "lucide-react";
+import { Calendar, Activity, Star, Hospital, ArrowRight, Users, Bus } from "lucide-react";
+
+// ─── Hardcoded transport data ───────────────────────────────────────────────
+const TRANSPORT_SCHEDULE = {
+  morning: [
+    { route: "8th & Stellar ↔ Naga Emas",            freq: "Every 15 mins", time: "07:00 – 09:00 AM" },
+    { route: "8th & Stellar ↔ Sri Petaling (Parking)", freq: "Every 15 mins", time: "07:00 – 09:00 AM" },
+    { route: "8th & Stellar ↔ KL Sentral",            freq: "Express · No stops", time: "07:30 – 08:30 AM" },
+    { route: "8th & Stellar ↔ Ampang Park",           freq: "Every 20 mins", time: "08:00 – 09:00 AM" },
+  ],
+  evening: [
+    { route: "8th & Stellar ↔ Naga Emas",            freq: "Every 15 mins", time: "04:30 – 07:00 PM" },
+    { route: "8th & Stellar ↔ Sri Petaling (Parking)", freq: "Every 15 mins", time: "04:30 – 06:45 PM" },
+    { route: "8th & Stellar ↔ KL Sentral",            freq: "Express · No stops", time: "05:30 – 07:00 PM" },
+    { route: "8th & Stellar ↔ Ampang Park",           freq: "Every 20 mins", time: "05:00 – 06:30 PM" },
+  ],
+};
+// ────────────────────────────────────────────────────────────────────────────
 
 const statusBadge = (status) => {
   const map = {
@@ -33,6 +50,84 @@ const formatTime = (dateStr) => {
   });
 };
 
+// ─── Transport Schedule sub-component ───────────────────────────────────────
+function TransportCard({ onNavigate }) {
+  // Auto-select tab based on current hour: morning before noon, evening after
+  const defaultTab = new Date().getHours() < 12 ? "morning" : "evening";
+  const [tab, setTab] = useState(defaultTab);
+  const rows = TRANSPORT_SCHEDULE[tab];
+
+  return (
+    <div className="card">
+      {/* Header */}
+      <div className="flex-between" style={{ marginBottom: 14 }}>
+        <div className="card-title" style={{ marginBottom: 0, display: "flex", alignItems: "center", gap: 8 }}>
+          <Bus size={16} /> Transport Schedule
+        </div>
+        <button
+          className="btn btn-ghost btn-sm"
+          onClick={() => onNavigate("transport")}
+        >
+          Book a Seat
+        </button>
+      </div>
+
+      {/* Mon–Fri notice */}
+      <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 10 }}>
+        Mon – Fri · Except Public Holidays
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+        {["morning", "evening"].map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={tab === t ? "btn btn-primary btn-sm" : "btn btn-ghost btn-sm"}
+            style={{ textTransform: "capitalize", fontSize: 12 }}
+          >
+            {t === "morning" ? "🌅 Morning" : "🌆 Evening"}
+          </button>
+        ))}
+      </div>
+
+      {/* Schedule rows */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+        {rows.map((r, i) => (
+          <div
+            key={i}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              padding: "10px 0",
+              borderBottom: i < rows.length - 1 ? "1px solid var(--border)" : "none",
+            }}
+          >
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text)" }}>{r.route}</div>
+              <div style={{ fontSize: 11, color: "var(--text3)", marginTop: 2 }}>{r.freq}</div>
+            </div>
+            <div
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                color: "var(--accent)",
+                textAlign: "right",
+                whiteSpace: "nowrap",
+                marginLeft: 12,
+              }}
+            >
+              {r.time}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+// ────────────────────────────────────────────────────────────────────────────
+
 export default function Dashboard({ setActivePage }) {
   const userId = "EMP001";
   const [employee, setEmployee] = useState(null);
@@ -44,7 +139,7 @@ export default function Dashboard({ setActivePage }) {
   const navigate = useNavigate();
 
   const CACHE_KEY = `dashboard_${userId}`;
-  const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+  const CACHE_TTL = 5 * 60 * 1000;
 
   const applyDashboardData = (data) => {
     const today = new Date().toISOString().split("T")[0];
@@ -87,7 +182,6 @@ export default function Dashboard({ setActivePage }) {
       try {
         setLoading(true);
 
-        // ✅ Check cache first — skip API calls if still fresh
         const cached = sessionStorage.getItem(CACHE_KEY);
         if (cached) {
           const { data, timestamp } = JSON.parse(cached);
@@ -98,7 +192,6 @@ export default function Dashboard({ setActivePage }) {
           }
         }
 
-        // 🌐 Cache miss — fetch all in parallel
         const today = new Date().toISOString().split("T")[0];
         const [userRes, leaveRes, historyResRaw, bookingRes, ticketsRaw] = await Promise.all([
           api.get(`/users/${userId}`),
@@ -116,9 +209,7 @@ export default function Dashboard({ setActivePage }) {
           tickets: Array.isArray(ticketsRaw) ? ticketsRaw : [],
         };
 
-        // 💾 Save to cache
         sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
-
         applyDashboardData(data);
       } catch (error) {
         console.error("Dashboard load error:", error);
@@ -245,6 +336,10 @@ export default function Dashboard({ setActivePage }) {
               <div style={{ textAlign: "center", color: "var(--text3)", padding: "16px 0" }}>No upcoming bookings</div>
             )}
           </div>
+
+          {/* ✅ Transport Schedule — hardcoded, always visible */}
+          <TransportCard onNavigate={setActivePage} />
+
         </div>
 
         {/* Right Column */}
@@ -301,6 +396,7 @@ export default function Dashboard({ setActivePage }) {
               {[
                 { label: <><Calendar size={16} /> Apply for Leave</>, page: "/leave" },
                 { label: <><Users size={16} /> Book a Meeting Room</>, page: "/calendar" },
+                { label: <><Bus size={16} /> Book Transport Seat</>, page: "/transport" },
                 { label: <><Activity size={16} /> Ask AI Assistant</>, page: "/chat" },
               ].map((a) => (
                 <button
