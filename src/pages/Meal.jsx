@@ -95,7 +95,7 @@ export default function Meal({ setActivePage }) {
   // ── Order Success Screen ──────────────────────────────────────────────────
   if (orderPlaced) {
     return (
-      <div style={{ padding: "0 24px 24px 24px" }}>
+      <div style={{ padding: "0 32px 32px 24px", maxWidth: "1400px" }}>
         <div className="page-header">
           <div className="flex-between">
             <div>
@@ -171,7 +171,7 @@ export default function Meal({ setActivePage }) {
 
   // ── Main View ─────────────────────────────────────────────────────────────
   return (
-    <div style={{ padding: "0 24px 24px 24px" }}>
+    <div style={{ padding: "0 32px 32px 24px", maxWidth: "1400px" }}>
       <div className="page-header">
         <div className="flex-between">
           <div>
@@ -238,7 +238,7 @@ export default function Meal({ setActivePage }) {
         </div>
       ) : (
         // ── Order tab ─────────────────────────────────────────────────────
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 24 }}>
           {/* Menu */}
           <div>
             {/* Session selector */}

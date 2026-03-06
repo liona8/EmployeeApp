@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { LayoutDashboard, CalendarDays, ClipboardCheck, Bot, Ticket, UtensilsCrossed, Users } from "lucide-react";
+import { LayoutDashboard, CalendarDays, ClipboardCheck, Bot, Ticket, UtensilsCrossed, Users, Heart, GraduationCap } from "lucide-react";
 import "../../pages/all.css";
 
 export default function Layout() {
@@ -14,8 +14,10 @@ export default function Layout() {
     { path: "/chat", label: "AI Assistant", icon: Bot },
     { path: "/leave", label: "Leave Management", icon: ClipboardCheck },
     { path: "/tickets", label: "Service Tickets", icon: Ticket },
-    { path: "/meal", label: "Meal", icon: UtensilsCrossed },
     { path: "/evisitor", label: "eVisitor", icon: Users },
+    { path: "/meal", label: "Meal", icon: UtensilsCrossed },
+    { path: "/wellness", label: "Wellness", icon: Heart },
+    { path: "/chart", label: "CHART", icon: GraduationCap },
   ];
 
   return (

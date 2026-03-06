@@ -169,7 +169,7 @@ export default function EVisitor({ setActivePage }) {
   // ── QR View ──────────────────────────────────────────────────────────────
   if (view === "qr" && selectedVisitor) {
     return (
-      <div style={{ padding: "0 24px 24px 24px" }}>
+      <div style={{ padding: "0 32px 32px 24px", maxWidth: "1400px" }}>
         <div className="page-header">
           <div className="flex-between">
             <div>
@@ -182,7 +182,7 @@ export default function EVisitor({ setActivePage }) {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
           {/* QR Card */}
           <div className="card" style={{ textAlign: "center", padding: "32px 24px" }}>
             <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text3)", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.8px" }}>
@@ -279,7 +279,7 @@ export default function EVisitor({ setActivePage }) {
   // ── Form View ─────────────────────────────────────────────────────────────
   if (view === "form") {
     return (
-      <div style={{ padding: "0 24px 24px 24px" }}>
+      <div style={{ padding: "0 32px 32px 24px", maxWidth: "1400px" }}>
         <div className="page-header">
           <div className="flex-between">
             <div>
@@ -292,7 +292,7 @@ export default function EVisitor({ setActivePage }) {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 24 }}>
           <div className="card">
             <div className="card-title">Visitor Information</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -394,7 +394,7 @@ export default function EVisitor({ setActivePage }) {
 
   // ── List View (default) ───────────────────────────────────────────────────
   return (
-    <div style={{ padding: "0 24px 24px 24px" }}>
+    <div style={{ padding: "0 32px 32px 24px", maxWidth: "1400px" }}>
       <div className="page-header">
         <div className="flex-between">
           <div>
