@@ -182,11 +182,11 @@ export default function CalendarPage() {
       const duration = parseInt(bookingForm.duration);
 
       // Step 1: Validate booking time against backend
-      const timeValidation = await bookingService.validateBookingTime({
-        booking_date: bookingForm.date,
+      const timeValidation = await bookingService.validateBookingTime(
+        bookingForm.date,
         start_time_iso,
-        duration_minutes: duration,
-      });
+        duration
+      );
 
       setBookingValidation(timeValidation);
 
@@ -201,12 +201,12 @@ export default function CalendarPage() {
         const endDt = new Date(new Date(start_time_iso).getTime() + duration * 60000);
         const end_time_iso = endDt.toISOString().replace("Z", "+08:00");
 
-        const availabilityResult = await bookingService.checkAttendeeAvailability({
-          attendee_user_ids: bookingForm.attendees.map(a => a.user_id),
-          booking_date: bookingForm.date,
+        const availabilityResult = await bookingService.checkAttendeeAvailability(
+          bookingForm.attendees.map(a => a.user_id),
+          bookingForm.date,
           start_time_iso,
-          end_time_iso,
-        });
+          end_time_iso
+        );
 
         if (!availabilityResult.all_available) {
           setAttendeeConflicts(availabilityResult.conflicts);
@@ -215,7 +215,7 @@ export default function CalendarPage() {
       }
 
       // Step 3: Search available rooms
-      const result = await bookingService.searchAvailableRooms({
+      const result = await roomService.searchAvailableRooms({
         booking_date: bookingForm.date,
         start_time_iso,
         duration_minutes: duration,
