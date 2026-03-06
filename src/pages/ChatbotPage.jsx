@@ -161,20 +161,40 @@ export default function ChatbotPage() {
     }
   };
 
-  // Render simple markdown-like formatting
-  const renderText = (text) => {
+  // Render simple markdown-like formatting with optional photo
+  const renderText = (text, photoUrl) => {
     const lines = text.split("\n");
-    return lines.map((line, i) => {
-      const formatted = line
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/`(.+?)`/g, '<code style="background:var(--bg3);padding:1px 5px;border-radius:4px;font-size:12px">$1</code>');
-      return (
-        <span key={i}>
-          <span dangerouslySetInnerHTML={{ __html: formatted }} />
-          {i < lines.length - 1 && <br />}
-        </span>
-      );
-    });
+    return (
+      <>
+        {lines.map((line, i) => {
+          const formatted = line
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/`(.+?)`/g, '<code style="background:var(--bg3);padding:1px 5px;border-radius:4px;font-size:12px">$1</code>');
+          return (
+            <span key={i}>
+              <span dangerouslySetInnerHTML={{ __html: formatted }} />
+              {i < lines.length - 1 && <br />}
+            </span>
+          );
+        })}
+        
+        {/* Show photo thumbnail if available */}
+        {photoUrl && (
+          <div style={{ marginTop: 8 }}>
+            <img 
+              src={photoUrl} 
+              alt="Attached" 
+              style={{ 
+                maxWidth: '200px', 
+                maxHeight: '150px', 
+                borderRadius: 8,
+                border: '1px solid var(--border)'
+              }} 
+            />
+          </div>
+        )}
+      </>
+    );
   };
 
   return (
@@ -219,7 +239,7 @@ export default function ChatbotPage() {
             </div>
             <div>
               <div className="message-bubble">
-                {renderText(msg.text)}
+                {renderText(msg.text, msg.photo_url)}
               </div>
               <div style={{
                 fontSize: 10, color: "var(--text3)", marginTop: 4,
