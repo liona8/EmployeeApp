@@ -92,18 +92,28 @@ export default function ChatbotPage() {
   const send = async (text) => {
     if ((!text.trim() && !uploadedPhotoUrl) || loading) return;
     
-    // Build message text including photo mention
+    // Build message text including photo URL for the agent to see
     let messageText = text.trim();
-    if (uploadedPhotoUrl && messageText) {
-      messageText = messageText + "\n\n[Photo attached]";
-    } else if (uploadedPhotoUrl) {
-      messageText = "[Photo attached]";
+    let displayText = text.trim();
+    
+    if (uploadedPhotoUrl) {
+      // Add photo URL to the message that goes to the agent
+      const photoUrlMessage = `[Photo URL: ${uploadedPhotoUrl}]`;
+      const photoDisplayMessage = "[Photo attached]";
+      
+      if (messageText) {
+        messageText = messageText + "\n\n" + photoUrlMessage;
+        displayText = displayText + "\n\n" + photoDisplayMessage;
+      } else {
+        messageText = photoUrlMessage;
+        displayText = photoDisplayMessage;
+      }
     }
     
     const userMsg = {
       id: Date.now(),
       role: "user",
-      text: messageText,
+      text: displayText,  // Show user-friendly version in UI
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       photo_url: uploadedPhotoUrl,
     };
@@ -113,10 +123,9 @@ export default function ChatbotPage() {
 
     try {
       const response = await api.post('/api/ai/chat', {
-        message: text.trim(),
+        message: messageText,  // Send version with actual URL to agent
         user_id: 'EMP001',
         thread_id: threadId,
-        photo_url: uploadedPhotoUrl,
       });
 
       setThreadId(response.data.thread_id);
