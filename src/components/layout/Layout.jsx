@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { LayoutDashboard, CalendarDays, ClipboardCheck, Bot, Ticket } from "lucide-react";
+import { LayoutDashboard, CalendarDays, ClipboardCheck, Bot, Ticket, UtensilsCrossed, Users } from "lucide-react";
 import "../../pages/all.css";
 
 export default function Layout() {
@@ -13,7 +13,9 @@ export default function Layout() {
     { path: "/calendar", label: "Calendar", icon: CalendarDays },
     { path: "/chat", label: "AI Assistant", icon: Bot },
     { path: "/leave", label: "Leave Management", icon: ClipboardCheck },
-    { path: "/tickets", label: "Service Tickets", icon: Ticket }, // <-- changed icon
+    { path: "/tickets", label: "Service Tickets", icon: Ticket },
+    { path: "/meal", label: "Meal", icon: UtensilsCrossed },
+    { path: "/evisitor", label: "eVisitor", icon: Users },
   ];
 
   return (
@@ -55,10 +57,12 @@ export default function Layout() {
 
         <div className="sidebar-footer">
           <button
+            className="btn btn-ghost btn-sm"
             onClick={() => {
               localStorage.removeItem("token");
               navigate("/login");
             }}
+            style={{ flex: 1, justifyContent: "center" }}
           >
             Logout
           </button>
@@ -66,6 +70,7 @@ export default function Layout() {
           <button
             className="collapse-btn"
             onClick={() => setSidebarOpen(!sidebarOpen)}
+            title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
           >
             {sidebarOpen ? "←" : "→"}
           </button>

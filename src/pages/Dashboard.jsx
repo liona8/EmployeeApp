@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { dashboardService } from "../services/dashboard";
 import api from "../services/api";
 import "./all.css";
-import { Calendar, Activity, Star, Hospital, ArrowRight, Users, Bus } from "lucide-react";
+import { Calendar, Activity, Star, Hospital, ArrowRight, Users, Bus, Bell } from "lucide-react";
 
 // ─── Hardcoded transport data ───────────────────────────────────────────────
 const TRANSPORT_SCHEDULE = {
@@ -236,11 +236,24 @@ export default function Dashboard({ setActivePage }) {
         <div className="flex-between">
           <div>
             <div className="page-title">Good morning, Kueh👋</div>
-            <div className="page-subtitle">{employee?.job_title} · {employee?.department}</div>
+            <div className="page-subtitle">
+              {employee?.job_title || "Software Engineer"} · {employee?.department || "Engineering"} · {new Date().toLocaleDateString("en-MY", { day: "numeric", month: "short", year: "numeric" })} ({new Date().toLocaleDateString("en-MY", { weekday: "long" })})
+            </div>
           </div>
           <div className="flex-gap">
-            <button className="btn btn-ghost btn-sm" onClick={() => setActivePage("leave")}>Apply Leave</button>
-            <button className="btn btn-primary btn-sm" onClick={() => setActivePage("chat")}>AI Assistant</button>
+            <button 
+              className="btn btn-ghost btn-sm" 
+              onClick={() => navigate("/notifications")}
+              style={{ display: "flex", alignItems: "center", gap: 6 }}
+            >
+              <Bell size={16} /> Notifications
+            </button>
+            <button 
+              className="btn btn-primary btn-sm" 
+              onClick={() => navigate("/chat")}
+            >
+              AI Assistant
+            </button>
           </div>
         </div>
       </div>

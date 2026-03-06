@@ -5,6 +5,8 @@ import ChatbotPage from "./pages/ChatbotPage";
 import CalendarPage from "./pages/CalendarPage";
 import LeaveManagement from "./pages/LeaveManagementPage";
 import ServiceTicketsPage from "./pages/ServiceTicketPage";
+import MealPage from "./pages/Meal";
+import EVisitorPage from "./pages/eVisitor";
 import LoginPage from "./pages/login";
 import Layout from "../src/components/layout/Layout";
 
@@ -37,6 +39,8 @@ export default function App() {
             <Route path="leave" element={<LeaveManagement />} />
             <Route path="chat" element={<ChatbotPage />} />
             <Route path="tickets" element={<ServiceTicketsPage />} />
+            <Route path="meal" element={<MealPage />} />
+            <Route path="evisitor" element={<EVisitorPage />} />
           </Route>
         ) : (
           <Route path="*" element={<Navigate to="/login" />} />
