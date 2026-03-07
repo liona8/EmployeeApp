@@ -12,6 +12,7 @@ export default function LoginPage({ setIsAuthenticated }) {
   const [error, setError]       = useState("");
   const [focused, setFocused]   = useState("");
   const [success, setSuccess]   = useState(false);
+  const [userName, setUserName] = useState("");
 
   const clearErr = () => setError("");
 
@@ -37,6 +38,7 @@ export default function LoginPage({ setIsAuthenticated }) {
           },
         };
         sessionStorage.setItem("session", JSON.stringify(session));
+        setUserName(session.user.name);
         setIsAuthenticated(true);
         navigate("/");
       }, 1900);
@@ -69,7 +71,7 @@ export default function LoginPage({ setIsAuthenticated }) {
               <Check size={28} strokeWidth={2} />
             </div>
             <h3>Signed in successfully</h3>
-            <p>Welcome back, {sessionStorage.getItem("session") ? JSON.parse(sessionStorage.getItem("session")).user.name : ""}. Loading your dashboard…</p>
+            <p>Welcome back, {userName}. Loading your dashboard…</p>
             <div className="login-redirect-bar">
               <div className="login-redirect-fill" />
             </div>
