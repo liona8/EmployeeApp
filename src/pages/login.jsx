@@ -38,7 +38,9 @@ export default function LoginPage({ setIsAuthenticated }) {
         };
         sessionStorage.setItem("session", JSON.stringify(session));
         setIsAuthenticated(true);
-        navigate("/");
+        // Check if walkthrough was already watched
+        const walkthroughWatched = sessionStorage.getItem("walkthroughWatched");
+        navigate(walkthroughWatched ? "/" : "/walkthrough");
       }, 1900);
     } else {
       setError("Invalid Employee ID or password. Try EMP001 / password123");

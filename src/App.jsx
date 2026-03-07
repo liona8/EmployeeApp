@@ -9,6 +9,7 @@ import MealPage from "./pages/Meal";
 import EVisitorPage from "./pages/eVisitor";
 import WellnessPage from "./pages/Wellness";
 import ChartPage from "./pages/Chart";
+import WalkthroughPage from "./pages/Walkthrough";
 import LoginPage from "./pages/login";
 import Layout from "../src/components/layout/Layout";
 
@@ -31,6 +32,12 @@ export default function App() {
         <Route
           path="/login"
           element={<LoginPage setIsAuthenticated={setIsAuthenticated} />}
+        />
+
+        {/* Walkthrough */}
+        <Route
+          path="/walkthrough"
+          element={isAuthenticated ? <WalkthroughPage /> : <Navigate to="/login" />}
         />
 
         {/* Protected Layout */}
