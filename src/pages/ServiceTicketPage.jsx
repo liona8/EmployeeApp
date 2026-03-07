@@ -51,11 +51,35 @@ function getSlaStatus(ticket) {
   if (ticket.status === "Resolved" || ticket.status === "Closed")
     return { label: "SLA Met", color: "#34d399", overdue: false };
   if (now > deadline) {
-    const h = Math.max(1, Math.floor((now - deadline) / 3_600_000));
-    return { label: `Overdue ${h}h`, color: "#f87171", overdue: true };
+    const overdueMs = now - deadline;
+    const overdueHours = Math.max(1, Math.floor(overdueMs / 3_600_000));
+    const days = Math.floor(overdueHours / 24);
+    const hours = overdueHours % 24;
+    
+    let label;
+    if (days > 0 && hours > 0) {
+      label = `Overdue ${days}d ${hours}h`;
+    } else if (days > 0) {
+      label = `Overdue ${days}d`;
+    } else {
+      label = `Overdue ${hours}h`;
+    }
+    return { label, color: "#f87171", overdue: true };
   }
-  const h = Math.floor((deadline - now) / 3_600_000);
-  return { label: `${h}h left`, color: "#fbbf24", overdue: false };
+  const remainingMs = deadline - now;
+  const remainingHours = Math.floor(remainingMs / 3_600_000);
+  const days = Math.floor(remainingHours / 24);
+  const hours = remainingHours % 24;
+  
+  let label;
+  if (days > 0 && hours > 0) {
+    label = `${days}d ${hours}h left`;
+  } else if (days > 0) {
+    label = `${days}d left`;
+  } else {
+    label = `${hours}h left`;
+  }
+  return { label, color: "#fbbf24", overdue: false };
 }
 
 // ── Detail Drawer ──────────────────────────────────────────────────────────────

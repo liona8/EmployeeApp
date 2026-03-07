@@ -92,18 +92,28 @@ export default function ChatbotPage() {
   const send = async (text) => {
     if ((!text.trim() && !uploadedPhotoUrl) || loading) return;
     
-    // Build message text including photo mention
+    // Build message text including photo URL for the agent to see
     let messageText = text.trim();
-    if (uploadedPhotoUrl && messageText) {
-      messageText = messageText + "\n\n[Photo attached]";
-    } else if (uploadedPhotoUrl) {
-      messageText = "[Photo attached]";
+    let displayText = text.trim();
+    
+    if (uploadedPhotoUrl) {
+      // Add photo URL to the message that goes to the agent
+      const photoUrlMessage = `[Photo URL: ${uploadedPhotoUrl}]`;
+      const photoDisplayMessage = "[Photo attached]";
+      
+      if (messageText) {
+        messageText = messageText + "\n\n" + photoUrlMessage;
+        displayText = displayText + "\n\n" + photoDisplayMessage;
+      } else {
+        messageText = photoUrlMessage;
+        displayText = photoDisplayMessage;
+      }
     }
     
     const userMsg = {
       id: Date.now(),
       role: "user",
-      text: messageText,
+      text: displayText,  // Show user-friendly version in UI
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       photo_url: uploadedPhotoUrl,
     };
@@ -113,10 +123,9 @@ export default function ChatbotPage() {
 
     try {
       const response = await api.post('/api/ai/chat', {
-        message: text.trim(),
+        message: messageText,  // Send version with actual URL to agent
         user_id: 'EMP001',
         thread_id: threadId,
-        photo_url: uploadedPhotoUrl,
       });
 
       setThreadId(response.data.thread_id);
@@ -152,20 +161,40 @@ export default function ChatbotPage() {
     }
   };
 
-  // Render simple markdown-like formatting
-  const renderText = (text) => {
+  // Render simple markdown-like formatting with optional photo
+  const renderText = (text, photoUrl) => {
     const lines = text.split("\n");
-    return lines.map((line, i) => {
-      const formatted = line
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/`(.+?)`/g, '<code style="background:var(--bg3);padding:1px 5px;border-radius:4px;font-size:12px">$1</code>');
-      return (
-        <span key={i}>
-          <span dangerouslySetInnerHTML={{ __html: formatted }} />
-          {i < lines.length - 1 && <br />}
-        </span>
-      );
-    });
+    return (
+      <>
+        {lines.map((line, i) => {
+          const formatted = line
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/`(.+?)`/g, '<code style="background:var(--bg3);padding:1px 5px;border-radius:4px;font-size:12px">$1</code>');
+          return (
+            <span key={i}>
+              <span dangerouslySetInnerHTML={{ __html: formatted }} />
+              {i < lines.length - 1 && <br />}
+            </span>
+          );
+        })}
+        
+        {/* Show photo thumbnail if available */}
+        {photoUrl && (
+          <div style={{ marginTop: 8 }}>
+            <img 
+              src={photoUrl} 
+              alt="Attached" 
+              style={{ 
+                maxWidth: '200px', 
+                maxHeight: '150px', 
+                borderRadius: 8,
+                border: '1px solid var(--border)'
+              }} 
+            />
+          </div>
+        )}
+      </>
+    );
   };
 
   return (
@@ -210,7 +239,7 @@ export default function ChatbotPage() {
             </div>
             <div>
               <div className="message-bubble">
-                {renderText(msg.text)}
+                {renderText(msg.text, msg.photo_url)}
               </div>
               <div style={{
                 fontSize: 10, color: "var(--text3)", marginTop: 4,

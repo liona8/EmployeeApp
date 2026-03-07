@@ -40,7 +40,9 @@ export default function LoginPage({ setIsAuthenticated }) {
         sessionStorage.setItem("session", JSON.stringify(session));
         setUserName(session.user.name);
         setIsAuthenticated(true);
-        navigate("/");
+        // Check if walkthrough was already watched
+        const walkthroughWatched = sessionStorage.getItem("walkthroughWatched");
+        navigate(walkthroughWatched ? "/" : "/walkthrough");
       }, 1900);
     } else {
       setError("Invalid Employee ID or password. Try EMP001 / password123");
@@ -59,12 +61,17 @@ export default function LoginPage({ setIsAuthenticated }) {
         <div className="login-bg-blob login-bg-blob-2" />
         <div className="login-bg-blob login-bg-blob-3" />
         <div className="login-card">
-          <div className="login-logo-row">
-            <div className="login-logo-mark">CH</div>
-            <div>
-              <div className="login-logo-name">Chin Hin Group</div>
-              <div className="login-logo-sub">Employee Portal</div>
-            </div>
+          <div className="login-logo-row" style={{ flexDirection: 'column', gap: 16 }}>
+            <img 
+              src="/chg_logo.png" 
+              alt="Logo" 
+              style={{ 
+                width: '60%', 
+                height: 'auto', 
+                borderRadius: 12 
+              }} 
+            />
+            <div className="login-logo-sub" style={{ fontSize: 14, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Employee Portal</div>
           </div>
           <div className="login-success">
             <div className="login-success-icon">
@@ -92,12 +99,17 @@ export default function LoginPage({ setIsAuthenticated }) {
       <div className="login-card">
 
         {/* Logo */}
-        <div className="login-logo-row">
-          <div className="login-logo-mark">CH</div>
-          <div>
-            <div className="login-logo-name">Chin Hin Group</div>
-            <div className="login-logo-sub">Employee Portal</div>
-          </div>
+        <div className="login-logo-row" style={{ flexDirection: 'column', gap: 16 }}>
+          <img 
+            src="/chg_logo.png" 
+            alt="Logo" 
+            style={{ 
+              width: '60%', 
+              height: 'auto', 
+              borderRadius: 12 
+            }} 
+          />
+          <div className="login-logo-sub" style={{ fontSize: 14, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Employee Portal</div>
         </div>
 
         {/* Heading */}
