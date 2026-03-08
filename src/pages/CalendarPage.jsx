@@ -22,121 +22,45 @@ function formatKey(y, m, d) {
   return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 }
 
-// ─── Hardcoded room facility metadata ────────────────────────────────────────
-// This merges with whatever the API returns — API data takes priority for
-// capacity/name/location, but facilities/tags come from here keyed by room name.
-const ROOM_FACILITY_META = {
-  "Signature Teams Room": {
-    emoji: "🖥️",
-    tag: "Teams Room",
-    tagColor: "#5b7cfa",
-    highlights: ["5 seats", "Projector", "180° Camera", "Whiteboard", "Wireless Mic", "Conference Cam", "Tabletop Teams Panel"],
-    facilities: [
-      { icon: "📽️", label: "Projector" },
-      { icon: "📷", label: "180° Camera" },
-      { icon: "🪧", label: "Whiteboard" },
-      { icon: "🎙️", label: "Wireless Mic" },
-      { icon: "📹", label: "Conference Cam" },
-      { icon: "📱", label: "Tabletop Teams Panel" },
-      { icon: "📶", label: "Wi-Fi" },
-    ],
-    bestFor: "Hybrid meetings & video calls",
-  },
-  "Boardroom A": {
-    emoji: "🏛️",
-    tag: "Boardroom",
-    tagColor: "#a78bfa",
-    highlights: ["12 seats", "Projector", "Conference Cam", "Mic Array", "Whiteboard"],
-    facilities: [
-      { icon: "📽️", label: "Projector" },
-      { icon: "📹", label: "Conference Cam" },
-      { icon: "🎙️", label: "Mic Array" },
-      { icon: "🪧", label: "Whiteboard" },
-      { icon: "📺", label: "Secondary Screen" },
-      { icon: "📶", label: "Wi-Fi" },
-      { icon: "🔌", label: "Power Points" },
-    ],
-    bestFor: "Board meetings & presentations",
-  },
-  "Idea Lab 3": {
-    emoji: "💡",
-    tag: "Collaboration",
-    tagColor: "#34d399",
-    highlights: ["8 seats", "TV Screen", "Whiteboard", "Wi-Fi"],
-    facilities: [
-      { icon: "📺", label: "TV Screen" },
-      { icon: "🪧", label: "Whiteboard" },
-      { icon: "📶", label: "Wi-Fi" },
-      { icon: "🛋️", label: "Lounge Seating" },
-      { icon: "🔌", label: "Power Points" },
-    ],
-    bestFor: "Brainstorming & workshops",
-  },
-  "Focus Pod": {
-    emoji: "🔇",
-    tag: "Quiet Zone",
-    tagColor: "#fb923c",
-    highlights: ["2 seats", "Quiet Zone", "Wi-Fi"],
-    facilities: [
-      { icon: "📶", label: "Wi-Fi" },
-      { icon: "🔇", label: "Soundproofed" },
-      { icon: "🔌", label: "Power Points" },
-    ],
-    bestFor: "1-on-1s & focused work",
-  },
-  "Training Room B": {
-    emoji: "🎓",
-    tag: "Training",
-    tagColor: "#f59e0b",
-    highlights: ["20 seats", "Projector", "Dual Screen", "Whiteboard", "Mic"],
-    facilities: [
-      { icon: "📽️", label: "Projector" },
-      { icon: "📺", label: "Dual Screen" },
-      { icon: "🪧", label: "Whiteboard" },
-      { icon: "🎙️", label: "Mic" },
-      { icon: "📶", label: "Wi-Fi" },
-      { icon: "🔌", label: "Power Points" },
-      { icon: "🖨️", label: "Printer Access" },
-    ],
-    bestFor: "Training sessions & large meetings",
-  },
+// ─── Category → colour mapping (purely visual, not data) ─────────────────────
+const CATEGORY_COLORS = {
+  boardroom:     "#a78bfa",
+  training:      "#f59e0b",
+  collaboration: "#34d399",
+  focus:         "#fb923c",
+  teams:         "#5b7cfa",
+  default:       "#6b7280",
 };
 
-// Fallback meta for any room not in the map above
-const DEFAULT_ROOM_META = {
-  emoji: "🚪",
-  tag: "Meeting Room",
-  tagColor: "#6b7280",
-  highlights: [],
-  facilities: [
-    { icon: "📶", label: "Wi-Fi" },
-    { icon: "🔌", label: "Power Points" },
-  ],
-  bestFor: "General meetings",
-};
-
-function getRoomMeta(roomName) {
-  return ROOM_FACILITY_META[roomName] || DEFAULT_ROOM_META;
+function getCategoryColor(category = "") {
+  const key = category.toLowerCase().replace(/\s+/g, "");
+  return (
+    CATEGORY_COLORS[key] ||
+    Object.entries(CATEGORY_COLORS).find(([k]) => key.includes(k))?.[1] ||
+    CATEGORY_COLORS.default
+  );
 }
 
 // ─── Suitability score bar ────────────────────────────────────────────────────
 function ScoreBar({ score }) {
-  const pct = Math.min(100, Math.round((score / 10) * 100));
+  const pct = Math.min(100, score);
   const color = pct >= 70 ? "#34d399" : pct >= 40 ? "#f59e0b" : "#f87171";
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
       <div style={{ flex: 1, height: 5, background: "var(--border)", borderRadius: 3, overflow: "hidden" }}>
         <div style={{ width: `${pct}%`, height: "100%", background: color, borderRadius: 3, transition: "width 0.4s" }} />
       </div>
-      <span style={{ fontSize: 11, fontWeight: 700, color }}>{score}/10</span>
+      <span style={{ fontSize: 11, fontWeight: 700, color }}>{score}/100</span>
     </div>
   );
 }
 
-// ─── Rich Room Card ───────────────────────────────────────────────────────────
+// ─── Room Card — fully driven by API data ─────────────────────────────────────
 function RoomCard({ room, selected, onClick }) {
-  const meta = getRoomMeta(room.name);
   const [expanded, setExpanded] = useState(false);
+  const tagColor = getCategoryColor(room.category);
+  const amenities = room.amenities || [];
+  const VISIBLE_COUNT = 5;
 
   return (
     <div
@@ -152,24 +76,24 @@ function RoomCard({ room, selected, onClick }) {
     >
       {/* Card header */}
       <div style={{ padding: "14px 16px 10px", display: "flex", gap: 12, alignItems: "flex-start" }}>
-        {/* Emoji icon */}
+        {/* Category badge as icon area */}
         <div style={{
           width: 44, height: 44, borderRadius: 10, flexShrink: 0,
-          background: `${meta.tagColor}18`,
+          background: `${tagColor}18`,
           display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: 22, border: `1px solid ${meta.tagColor}30`,
+          fontSize: 11, fontWeight: 700, color: tagColor,
+          border: `1px solid ${tagColor}30`,
+          textAlign: "center", lineHeight: 1.2,
+          padding: "0 4px",
+          textTransform: "uppercase",
+          letterSpacing: "0.3px",
         }}>
-          {meta.emoji}
+          {room.category || "Room"}
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             <span style={{ fontWeight: 700, fontSize: 14, color: "var(--text)" }}>{room.name}</span>
-            <span style={{
-              fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 20,
-              background: `${meta.tagColor}18`, color: meta.tagColor,
-              border: `1px solid ${meta.tagColor}30`, whiteSpace: "nowrap",
-            }}>{meta.tag}</span>
             {selected && (
               <span style={{
                 fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 20,
@@ -187,61 +111,79 @@ function RoomCard({ room, selected, onClick }) {
             <span style={{ fontSize: 12, color: "var(--text3)", display: "flex", alignItems: "center", gap: 4 }}>
               📍 Floor <strong style={{ color: "var(--text2)" }}>{room.location}</strong>
             </span>
-            <span style={{ fontSize: 12, color: "var(--text3)" }}>
-              Best for: <em style={{ color: "var(--text2)", fontStyle: "normal" }}>{meta.bestFor}</em>
-            </span>
+            {room.category && (
+              <span style={{
+                fontSize: 11, padding: "1px 8px", borderRadius: 10,
+                background: `${tagColor}18`, color: tagColor,
+                border: `1px solid ${tagColor}30`, fontWeight: 600,
+              }}>
+                {room.category}
+              </span>
+            )}
           </div>
 
           {/* Suitability score */}
           <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ fontSize: 11, color: "var(--text3)", flexShrink: 0 }}>Match</span>
-            <ScoreBar score={room.suitability_score} />
+            <ScoreBar score={room.suitability_score ?? 0} />
           </div>
         </div>
       </div>
 
-      {/* Facility pills — always visible */}
-      <div style={{ padding: "0 16px 10px", display: "flex", flexWrap: "wrap", gap: 6 }}>
-        {meta.facilities.slice(0, expanded ? undefined : 5).map((f) => (
-          <span key={f.label} style={{
-            fontSize: 11, padding: "3px 9px", borderRadius: 6,
-            background: "var(--bg3)", border: "1px solid var(--border)",
-            color: "var(--text2)", display: "flex", alignItems: "center", gap: 4,
-          }}>
-            <span>{f.icon}</span> {f.label}
-          </span>
-        ))}
-        {meta.facilities.length > 5 && (
-          <button
-            onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
-            style={{
+      {/* Amenity pills from API */}
+      {amenities.length > 0 && (
+        <div style={{ padding: "0 16px 12px", display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {amenities.slice(0, expanded ? undefined : VISIBLE_COUNT).map((amenity) => (
+            <span key={amenity} style={{
               fontSize: 11, padding: "3px 9px", borderRadius: 6,
-              background: "transparent", border: "1px dashed var(--border)",
-              color: "var(--accent)", cursor: "pointer",
-            }}
-          >
-            {expanded ? "Show less" : `+${meta.facilities.length - 5} more`}
-          </button>
-        )}
-      </div>
-
-      {/* Amenities from API (if any extra) */}
-      {room.amenities?.length > 0 && (
-        <div style={{
-          margin: "0 16px 12px",
-          padding: "8px 10px",
-          background: "var(--bg3)",
-          borderRadius: 8,
-          border: "1px solid var(--border)",
-        }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: "var(--text3)", textTransform: "uppercase", letterSpacing: "0.6px", marginBottom: 5 }}>
-            Additional Amenities
-          </div>
-          <div style={{ fontSize: 11, color: "var(--text2)", lineHeight: 1.6 }}>
-            {room.amenities.join(" · ")}
-          </div>
+              background: "var(--bg3)", border: "1px solid var(--border)",
+              color: "var(--text2)",
+            }}>
+              {amenity}
+            </span>
+          ))}
+          {amenities.length > VISIBLE_COUNT && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
+              style={{
+                fontSize: 11, padding: "3px 9px", borderRadius: 6,
+                background: "transparent", border: "1px dashed var(--border)",
+                color: "var(--accent)", cursor: "pointer",
+              }}
+            >
+              {expanded ? "Show less" : `+${amenities.length - VISIBLE_COUNT} more`}
+            </button>
+          )}
         </div>
       )}
+
+      {amenities.length === 0 && (
+        <div style={{ padding: "0 16px 12px" }}>
+          <span style={{ fontSize: 11, color: "var(--text3)", fontStyle: "italic" }}>No amenity details available</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Compact amenity pills for the event detail sidebar ──────────────────────
+function AmenityPills({ amenities = [] }) {
+  if (!amenities.length) return null;
+  return (
+    <div style={{ marginTop: 4 }}>
+      <div style={{ fontSize: 10, fontWeight: 600, color: "var(--text3)", textTransform: "uppercase", letterSpacing: "0.6px", marginBottom: 5 }}>
+        Amenities
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+        {amenities.map(a => (
+          <span key={a} style={{
+            fontSize: 10, padding: "2px 7px", borderRadius: 5,
+            background: "var(--bg3)", border: "1px solid var(--border)", color: "var(--text2)",
+          }}>
+            {a}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
@@ -275,6 +217,9 @@ export default function CalendarPage() {
   const [bookingValidation, setBookingValidation] = useState(null);
   const [attendeeConflicts, setAttendeeConflicts] = useState([]);
 
+  // Room amenity cache: room_id → amenities[]
+  const [roomAmenityCache, setRoomAmenityCache] = useState({});
+
   const totalDays = getDaysInMonth(currentYear, currentMonth);
   const firstDay = getFirstDay(currentYear, currentMonth);
   const prevDays = getDaysInMonth(currentYear, currentMonth - 1);
@@ -286,17 +231,21 @@ export default function CalendarPage() {
     calanderService.fetchBookings({ host_user_id: currentUserId, start_date: startDate, end_date: endDate })
       .then(data => {
         const mapped = {};
-        data.bookings.forEach(b => {
-          if (!mapped[b.date]) mapped[b.date] = [];
-          mapped[b.date].push({ type: "booking", label: b.meeting_title, color: "#5b7cfa", details: b });
-        });
+        data.bookings
+          .filter(b => b.status !== "cancelled")
+          .forEach(b => {
+            if (!mapped[b.date]) mapped[b.date] = [];
+            mapped[b.date].push({ type: "booking", label: b.meeting_title, color: "#5b7cfa", details: b });
+          });
         setEvents(prev => ({ ...prev, ...mapped }));
       })
       .catch(err => console.error(err));
 
     leaveService.getLeaveHistory(currentUserId)
       .then(data => {
-        const leaveArray = data.leaves || data;
+        const leaveArray = (data.leaves || data).filter(
+          l => l.status !== "pending_approval" && l.status !== "cancelled"
+        );
         const mapped = {};
         leaveArray.forEach(l => {
           let current = new Date(l.start_date);
@@ -312,6 +261,26 @@ export default function CalendarPage() {
       })
       .catch(err => console.error(err));
   }, [currentYear, currentMonth]);
+
+  // Fetch amenities for a room and cache them
+  const fetchRoomAmenities = async (room_id) => {
+    if (roomAmenityCache[room_id]) return roomAmenityCache[room_id];
+    try {
+      const data = await roomService.getRoomAmenities(room_id);
+      const amenities = data.amenities || [];
+      setRoomAmenityCache(prev => ({ ...prev, [room_id]: amenities }));
+      return amenities;
+    } catch {
+      return [];
+    }
+  };
+
+  // When an event with a room is selected in the sidebar, load amenities
+  useEffect(() => {
+    if (selectedEvent?.details?.room_id) {
+      fetchRoomAmenities(selectedEvent.details.room_id);
+    }
+  }, [selectedEvent]);
 
   const cells = [];
   for (let i = firstDay - 1; i >= 0; i--) cells.push({ day: prevDays - i, current: false });
@@ -468,10 +437,12 @@ export default function CalendarPage() {
       const endDate = formatKey(currentYear, currentMonth, getDaysInMonth(currentYear, currentMonth));
       const data = await roomService.fetchBookings({ host_user_id: currentUserId, start_date: startDate, end_date: endDate });
       const mapped = {};
-      data.bookings.forEach(b => {
-        if (!mapped[b.date]) mapped[b.date] = [];
-        mapped[b.date].push({ type: "booking", label: b.meeting_title, color: "#5b7cfa" });
-      });
+      data.bookings
+        .filter(b => b.status !== "cancelled")
+        .forEach(b => {
+          if (!mapped[b.date]) mapped[b.date] = [];
+          mapped[b.date].push({ type: "booking", label: b.meeting_title, color: "#5b7cfa" });
+        });
       setEvents(prev => ({ ...prev, ...mapped }));
     } catch (err) {
       setBookingError(err.message);
@@ -587,22 +558,8 @@ export default function CalendarPage() {
                             <span style={{ color: "var(--text)", fontWeight: 500 }}>{row.value}</span>
                           </div>
                         ))}
-                        {/* Facility pills in event detail */}
-                        {e.details.room_name && (() => {
-                          const meta = getRoomMeta(e.details.room_name);
-                          return meta.facilities.length > 0 ? (
-                            <div style={{ marginTop: 4 }}>
-                              <div style={{ fontSize: 10, fontWeight: 600, color: "var(--text3)", textTransform: "uppercase", letterSpacing: "0.6px", marginBottom: 5 }}>Facilities</div>
-                              <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                                {meta.facilities.map(f => (
-                                  <span key={f.label} style={{ fontSize: 10, padding: "2px 7px", borderRadius: 5, background: "var(--bg3)", border: "1px solid var(--border)", color: "var(--text2)" }}>
-                                    {f.icon} {f.label}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          ) : null;
-                        })()}
+                        {/* Amenities from DB via cache */}
+                        <AmenityPills amenities={roomAmenityCache[e.details.room_id] || e.details.amenities || []} />
                         {e.details.attendees?.length > 0 && (
                           <div style={{ display: "flex", gap: 8, fontSize: 11, alignItems: "flex-start" }}>
                             <span>👤</span>
@@ -630,6 +587,7 @@ export default function CalendarPage() {
             <div className="card-title">Upcoming Events</div>
             {Object.entries(events)
               .filter(([k]) => k >= formatKey(today.getFullYear(), today.getMonth(), today.getDate()))
+              .sort(([a], [b]) => a.localeCompare(b))
               .slice(0, 5)
               .map(([dateKey, evts]) => (
                 <div key={dateKey} style={{ marginBottom: 12 }}>
@@ -657,32 +615,42 @@ export default function CalendarPage() {
                   <button className="modal-close" onClick={() => setShowBookingModal(false)}>×</button>
                 </div>
                 <div style={{ textAlign: "center", padding: "16px 0" }}>
-                  {/* Confirmed room facilities */}
-                  {selectedRoom && (() => {
-                    const meta = getRoomMeta(selectedRoom.name);
-                    return (
-                      <div style={{
-                        background: "var(--bg2)", borderRadius: 10,
-                        border: "1px solid var(--border)", padding: "14px 16px",
-                        marginBottom: 16, textAlign: "left",
-                      }}>
-                        <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 10 }}>
-                          <span style={{ fontSize: 24 }}>{meta.emoji}</span>
-                          <div>
-                            <div style={{ fontWeight: 700, fontSize: 14 }}>{selectedRoom.name}</div>
-                            <div style={{ fontSize: 11, color: "var(--text3)" }}>Floor {selectedRoom.location} · {selectedRoom.capacity} seats</div>
-                          </div>
+                  {selectedRoom && (
+                    <div style={{
+                      background: "var(--bg2)", borderRadius: 10,
+                      border: "1px solid var(--border)", padding: "14px 16px",
+                      marginBottom: 16, textAlign: "left",
+                    }}>
+                      <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 10 }}>
+                        <div style={{
+                          width: 36, height: 36, borderRadius: 8, flexShrink: 0,
+                          background: `${getCategoryColor(selectedRoom.category)}18`,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          fontSize: 10, fontWeight: 700, color: getCategoryColor(selectedRoom.category),
+                          textTransform: "uppercase", padding: "0 4px", textAlign: "center",
+                        }}>
+                          {selectedRoom.category || "Room"}
                         </div>
+                        <div>
+                          <div style={{ fontWeight: 700, fontSize: 14 }}>{selectedRoom.name}</div>
+                          <div style={{ fontSize: 11, color: "var(--text3)" }}>Floor {selectedRoom.location} · {selectedRoom.capacity} seats</div>
+                        </div>
+                      </div>
+                      {/* Amenities from the room object */}
+                      {selectedRoom.amenities?.length > 0 && (
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-                          {meta.facilities.map(f => (
-                            <span key={f.label} style={{ fontSize: 11, padding: "2px 8px", borderRadius: 5, background: "var(--bg3)", border: "1px solid var(--border)", color: "var(--text2)" }}>
-                              {f.icon} {f.label}
+                          {selectedRoom.amenities.map(a => (
+                            <span key={a} style={{
+                              fontSize: 11, padding: "2px 8px", borderRadius: 5,
+                              background: "var(--bg3)", border: "1px solid var(--border)", color: "var(--text2)",
+                            }}>
+                              {a}
                             </span>
                           ))}
                         </div>
-                      </div>
-                    );
-                  })()}
+                      )}
+                    </div>
+                  )}
                   <div style={{ fontSize: 13, color: "var(--text2)", marginBottom: 8 }}>{bookingSuccess.confirmation_message}</div>
                   <div style={{ fontSize: 12, color: "var(--text3)", marginBottom: 4 }}>Booking ID: <strong>{bookingSuccess.booking_id}</strong></div>
                   <div style={{ fontSize: 12, color: "var(--text3)", marginBottom: 20 }}>
@@ -693,7 +661,7 @@ export default function CalendarPage() {
               </>
             )}
 
-            {/* ROOM SELECTION — now using RoomCard */}
+            {/* ROOM SELECTION */}
             {bookingStep === "rooms" && (
               <>
                 <div className="modal-header">
@@ -701,7 +669,6 @@ export default function CalendarPage() {
                   <button className="modal-close" onClick={() => setBookingStep("form")}>‹ Back</button>
                 </div>
 
-                {/* Booking summary pill */}
                 <div style={{
                   display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14,
                   padding: "8px 12px", background: "var(--bg2)", borderRadius: 8,

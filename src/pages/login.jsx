@@ -78,7 +78,7 @@ export default function LoginPage({ setIsAuthenticated }) {
               <Check size={28} strokeWidth={2} />
             </div>
             <h3>Signed in successfully</h3>
-            <p>Welcome back, {userName}. Loading your dashboard…</p>
+            <p>Welcome back. Loading your dashboard…</p>
             <div className="login-redirect-bar">
               <div className="login-redirect-fill" />
             </div>
