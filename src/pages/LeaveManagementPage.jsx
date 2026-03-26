@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { leaveService } from "../services/leaveService";
-import { Calendar, Heart, BriefcaseMedical } from 'lucide-react';
 
 const LEAVE_TYPES = [
   { value: "annual_leave", label: "Annual Leave" },
@@ -208,14 +207,14 @@ export default function LeaveManagement() {
   };
 
   return (
-    <div>
+    <div className="leave-page">
       <div className="page-header">
         <div className="page-title">Leave Management</div>
         <div className="page-subtitle">Apply for leave, track applications, and view your entitlements</div>
       </div>
 
       {/* Tabs */}
-      <div style={{ padding: "0 32px", marginBottom: 20, display: "flex", gap: 4, borderBottom: "1px solid var(--border)" }}>
+      <div className="leave-tabs" style={{ marginBottom: 20, display: "flex", gap: 4, borderBottom: "1px solid var(--border)" }}>
         {[["apply", "Apply Leave"], ["history", "History"], ["balance", "Entitlements"]].map(([key, label]) => (
           <button key={key} onClick={() => setTab(key)}
             style={{
@@ -406,8 +405,9 @@ export default function LeaveManagement() {
 
       {/* History */}
       {tab === "history" && (
-        <div style={{ padding: "0 32px 32px" }}>
-          <div className="card">
+        <div className="leave-history-section">
+          {/* Desktop table */}
+          <div className="card leave-history-table">
             <div className="card-title">Leave Application History</div>
             <table className="data-table">
               <thead>
@@ -434,46 +434,76 @@ export default function LeaveManagement() {
               </tbody>
             </table>
           </div>
+
+          {/* Mobile cards */}
+          <div className="card leave-history-mobile">
+            <div className="card-title">Leave Application History</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {historyData.map(l => (
+                <div key={l.id} style={{ padding: "12px 14px", borderRadius: 10, background: "var(--bg3)", border: "1px solid var(--border)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                    <span style={{ fontWeight: 600, fontSize: 14, color: "var(--text)" }}>{l.leave_type}</span>
+                    {statusBadge(l.status)}
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--text3)", marginBottom: 4 }}>
+                    <span>Period</span>
+                    <span style={{ color: "var(--text2)" }}>{l.start_date} → {l.end_date}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--text3)", marginBottom: 4 }}>
+                    <span>Days</span>
+                    <span style={{ color: "var(--text2)" }}>{l.requested_days}d</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--text3)" }}>
+                    <span>Reason</span>
+                    <span style={{ color: "var(--text2)", textAlign: "right", maxWidth: "60%" }}>{l.reason}</span>
+                  </div>
+                  <div style={{ fontSize: 11, color: "var(--accent)", fontFamily: "monospace", marginTop: 6 }}>{l.id}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Balance */}
+      {/* Balance — stat cards match Service Tickets layout */}
       {tab === "balance" && (
-        <div style={{ padding: "0 32px 32px", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
-          {[
-            { key: "annual_leave", label: "Annual Leave", color: "blue", icon: <Calendar size={28} /> },
-            { key: "medical_leave", label: "Medical Leave", color: "green", icon: <BriefcaseMedical size={28} /> },
-            { key: "compassionate_leave", label: "Compassionate Leave", color: "purple", icon: <Heart size={28} /> },
-          ].map(({ key, label, color, icon }) => {
-            const b = balanceData?.[key] || {};
-            const total = b.total_entitlement || b.max_per_year || 9;
-            const used = b.used || 0;
-            const remaining = b.remaining !== undefined ? b.remaining : total;
-            const pct = Math.round((used / total) * 100);
-            return (
-              <div className={`stat-card ${color}`} key={key} style={{ padding: 20 }}>
-                <div style={{ fontSize: 28, marginBottom: 8 }}>{icon}</div>
-                <div style={{ fontSize: 12, color: "var(--text3)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
-                <div className="font-syne" style={{ fontSize: 36, fontWeight: 800, color: "var(--text)", margin: "6px 0" }}>{remaining}</div>
-                <div style={{ fontSize: 12, color: "var(--text2)", marginBottom: 12 }}>days remaining</div>
-                <div className="progress-track">
-                  <div className={`progress-fill fill-${color}`} style={{ width: `${pct}%` }} />
-                </div>
-                <div style={{ fontSize: 11, color: "var(--text3)", marginTop: 6 }}>
-                  {used} used · {total} total
-                </div>
-                {key === "annual_leave" && b.carry_forward_from_previous > 0 && (
-                  <div style={{ fontSize: 11, color: "var(--warning)", marginTop: 8 }}>
-                    ↩ {b.carry_forward_from_previous} carry-forward (exp. {b.carry_forward_expiry_date})
+        <div className="leave-entitlements-section">
+          <div className="ticket-stats leave-entitlement-stats">
+            {[
+              { key: "annual_leave", label: "Annual Leave", color: "blue" },
+              { key: "medical_leave", label: "Medical Leave", color: "green" },
+              { key: "compassionate_leave", label: "Compassionate Leave", color: "purple" },
+            ].map(({ key, label, color }) => {
+              const b = balanceData?.[key] || {};
+              const total = b.total_entitlement || b.max_per_year || 9;
+              const used = b.used || 0;
+              const remaining = b.remaining !== undefined ? b.remaining : total;
+              const underline = { blue: "var(--accent)", green: "var(--accent3)", purple: "var(--accent2)" }[color];
+              return (
+                <div
+                  key={key}
+                  className="ticket-stat-card leave-entitlement-card"
+                  style={{ borderTop: `2px solid ${underline}` }}
+                >
+                  <div className="ticket-stat-label">{label}</div>
+                  <div className="ticket-stat-count">{remaining}</div>
+                  <div className="ticket-stat-footer">days</div>
+                  <div className="leave-entitlement-meta">
+                    {used} used · {total} total
                   </div>
-                )}
-              </div>
-            );
-          })}
+                  {key === "annual_leave" && b.carry_forward_from_previous > 0 && (
+                    <div className="leave-entitlement-carry">
+                      ↩ {b.carry_forward_from_previous} carry-forward (exp. {b.carry_forward_expiry_date})
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
 
-          <div className="card" style={{ gridColumn: "1 / -1", marginTop: 0 }}>
+          <div className="card leave-policy-notes">
             <div className="card-title">Policy Notes</div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+            <div className="leave-policy-grid">
               {[
                 { title: "Advance Notice", desc: "Annual leave requires minimum 5 working days advance notice." },
                 { title: "Emergency Leave", desc: "Same-day leave must be notified before 9:00 AM with supporting documents." },

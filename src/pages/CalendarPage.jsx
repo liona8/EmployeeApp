@@ -463,7 +463,14 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 280px", gap: 16, padding: "0 32px 32px" }}>
+      <div
+        className="page-grid-two-col calendar-page-grid"
+        style={{
+          display: "grid",
+          "--page-grid-cols": "1fr 280px",
+          gap: 16,
+        }}
+      >
 
         {/* Calendar */}
         <div className="card">

@@ -200,32 +200,21 @@ export default function ChatbotPage() {
   return (
     <div className="chat-container">
       {/* Header */}
-      <div style={{
-        padding: "20px 32px",
-        borderBottom: "1px solid var(--border)",
-        display: "flex", alignItems: "center", gap: 12
-      }}>
-        <div style={{
-          width: 36, height: 36,
-          background: "linear-gradient(135deg, var(--accent), var(--accent2))",
-          borderRadius: 10,
-          display: "flex", alignItems: "center", justifyContent: "center"
-        }}>
-          <Sparkles size={18} color="white" />
-        </div>
-        <div>
-          <div className="font-syne" style={{ fontWeight: 700, fontSize: 16, color: "var(--text)" }}>
-            Chin Hin AI Assistant
+      <header className="chat-header" aria-label="Assistant">
+        <div className="chat-header-main">
+          <div className="chat-header-icon" aria-hidden>
+            <Sparkles size={18} color="white" />
           </div>
-          <div style={{ fontSize: 12, color: "var(--accent3)", display: "flex", alignItems: "center", gap: 4 }}>
-            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent3)" }} />
-            Online
+          <div className="chat-header-text">
+            <div className="chat-header-title font-syne">Chin Hin AI Assistant</div>
+            <div className="chat-header-status">
+              <span className="chat-header-status-dot" />
+              Online
+            </div>
           </div>
         </div>
-        <div style={{ marginLeft: "auto", fontSize: 12, color: "var(--text3)" }}>
-          Powered by Azure AI Foundry
-        </div>
-      </div>
+        <p className="chat-header-powered">Powered by Azure AI Foundry</p>
+      </header>
 
       {/* Messages */}
       <div className="chat-messages">

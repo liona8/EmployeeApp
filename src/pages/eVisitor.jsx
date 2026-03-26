@@ -100,6 +100,19 @@ function StatusBadge({ status }) {
   return <span className={`badge ${cls}`}>{label}</span>;
 }
 
+// ─── Reusable form field (must be outside component to avoid remount) ─────────
+function Field({ label, id, required, error, children }) {
+  return (
+    <div className="input-group" style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+      <label style={{ fontSize: 11, fontWeight: 600, color: "var(--text3)", textTransform: "uppercase", letterSpacing: "0.6px" }}>
+        {label} {required && <span style={{ color: "var(--danger, #f87171)" }}>*</span>}
+      </label>
+      {children}
+      {error && <span style={{ fontSize: 11, color: "var(--danger, #f87171)" }}>{error}</span>}
+    </div>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function EVisitor({ setActivePage }) {
   const [visitors, setVisitors] = useState(INITIAL_VISITORS);
@@ -149,16 +162,6 @@ export default function EVisitor({ setActivePage }) {
     setErrors({});
   };
 
-  const Field = ({ label, id, required, children }) => (
-    <div className="input-group" style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-      <label style={{ fontSize: 11, fontWeight: 600, color: "var(--text3)", textTransform: "uppercase", letterSpacing: "0.6px" }}>
-        {label} {required && <span style={{ color: "var(--danger, #f87171)" }}>*</span>}
-      </label>
-      {children}
-      {errors[id] && <span style={{ fontSize: 11, color: "var(--danger, #f87171)" }}>{errors[id]}</span>}
-    </div>
-  );
-
   const inputStyle = (id) => ({
     padding: "9px 12px", borderRadius: 8,
     background: "var(--bg3)", border: `1px solid ${errors[id] ? "var(--danger, #f87171)" : "var(--border)"}`,
@@ -169,7 +172,7 @@ export default function EVisitor({ setActivePage }) {
   // ── QR View ──────────────────────────────────────────────────────────────
   if (view === "qr" && selectedVisitor) {
     return (
-      <div style={{ padding: "0 32px 32px 24px", maxWidth: "1400px" }}>
+      <div className="evisitor-page">
         <div className="page-header">
           <div className="flex-between">
             <div>
@@ -182,7 +185,7 @@ export default function EVisitor({ setActivePage }) {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+        <div className="evisitor-qr-grid">
           {/* QR Card */}
           <div className="card" style={{ textAlign: "center", padding: "32px 24px" }}>
             <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text3)", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.8px" }}>
@@ -279,7 +282,7 @@ export default function EVisitor({ setActivePage }) {
   // ── Form View ─────────────────────────────────────────────────────────────
   if (view === "form") {
     return (
-      <div style={{ padding: "0 32px 32px 24px", maxWidth: "1400px" }}>
+      <div className="evisitor-page">
         <div className="page-header">
           <div className="flex-between">
             <div>
@@ -292,44 +295,44 @@ export default function EVisitor({ setActivePage }) {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 24 }}>
+        <div className="evisitor-form-grid">
           <div className="card">
             <div className="card-title">Visitor Information</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
 
-              <Field label="Full Name" id="name" required>
+              <Field label="Full Name" id="name" required error={errors.name}>
                 <input style={inputStyle("name")} value={form.name} placeholder="e.g. Ahmad Rizal bin Hassan"
                   onChange={(e) => setForm({ ...form, name: e.target.value })} />
               </Field>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                <Field label="IC / Passport No." id="ic" required>
+              <div className="evisitor-form-row">
+                <Field label="IC / Passport No." id="ic" required error={errors.ic}>
                   <input style={inputStyle("ic")} value={form.ic} placeholder="e.g. 900101-14-1234"
                     onChange={(e) => setForm({ ...form, ic: e.target.value })} />
                 </Field>
-                <Field label="Contact Number" id="phone" required>
+                <Field label="Contact Number" id="phone" required error={errors.phone}>
                   <input style={inputStyle("phone")} value={form.phone} placeholder="+60 12-345 6789"
                     onChange={(e) => setForm({ ...form, phone: e.target.value })} />
                 </Field>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                <Field label="Email" id="email">
+              <div className="evisitor-form-row">
+                <Field label="Email" id="email" error={errors.email}>
                   <input style={inputStyle("email")} value={form.email} placeholder="visitor@company.com"
                     onChange={(e) => setForm({ ...form, email: e.target.value })} />
                 </Field>
-                <Field label="Company" id="company">
+                <Field label="Company" id="company" error={errors.company}>
                   <input style={inputStyle("company")} value={form.company} placeholder="Company name"
                     onChange={(e) => setForm({ ...form, company: e.target.value })} />
                 </Field>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                <Field label="Visit Date" id="visitDate" required>
+              <div className="evisitor-form-row">
+                <Field label="Visit Date" id="visitDate" required error={errors.visitDate}>
                   <input type="date" style={inputStyle("visitDate")} value={form.visitDate}
                     onChange={(e) => setForm({ ...form, visitDate: e.target.value })} />
                 </Field>
-                <Field label="Purpose of Visit" id="purpose">
+                <Field label="Purpose of Visit" id="purpose" error={errors.purpose}>
                   <select style={{ ...inputStyle("purpose"), cursor: "pointer" }} value={form.purpose}
                     onChange={(e) => setForm({ ...form, purpose: e.target.value })}>
                     {PURPOSES.map((p) => <option key={p}>{p}</option>)}
@@ -337,7 +340,7 @@ export default function EVisitor({ setActivePage }) {
                 </Field>
               </div>
 
-              <Field label="Looking For (Host)" id="host" required>
+              <Field label="Looking For (Host)" id="host" required error={errors.host}>
                 <select style={{ ...inputStyle("host"), cursor: "pointer" }} value={form.host}
                   onChange={(e) => setForm({ ...form, host: e.target.value })}>
                   <option value="">Select employee...</option>
@@ -358,8 +361,8 @@ export default function EVisitor({ setActivePage }) {
             </div>
           </div>
 
-          {/* Side hints */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {/* Side hints — hidden on mobile */}
+          <div className="chart-desktop-sidebar" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div className="card">
               <div className="card-title">How It Works</div>
               {[
@@ -394,7 +397,7 @@ export default function EVisitor({ setActivePage }) {
 
   // ── List View (default) ───────────────────────────────────────────────────
   return (
-    <div style={{ padding: "0 32px 32px 24px", maxWidth: "1400px" }}>
+    <div className="evisitor-page">
       <div className="page-header">
         <div className="flex-between">
           <div>
@@ -407,8 +410,8 @@ export default function EVisitor({ setActivePage }) {
         </div>
       </div>
 
-      {/* Summary stats */}
-      <div className="stat-grid" style={{ marginBottom: 16 }}>
+      {/* Summary stats — mobile: 2×2 to match Service Tickets */}
+      <div className="stat-grid evisitor-stat-grid" style={{ marginBottom: 16 }}>
         {[
           { label: "Total Today", value: visitors.filter(v => v.visitDate === new Date().toISOString().split("T")[0]).length, cls: "blue" },
           { label: "Approved", value: visitors.filter(v => v.status === "approved").length, cls: "green" },
@@ -422,17 +425,13 @@ export default function EVisitor({ setActivePage }) {
         ))}
       </div>
 
-      <div className="card">
-        <div className="flex-between" style={{ marginBottom: 16 }}>
+      <div className="card evisitor-log-card">
+        <div className="evisitor-log-header">
           <div className="card-title" style={{ marginBottom: 0 }}>Visitor Log</div>
-          <div style={{ position: "relative" }}>
-            <Search size={14} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "var(--text3)" }} />
+          <div className="evisitor-log-search">
+            <Search size={14} className="evisitor-log-search-icon" aria-hidden />
             <input
-              style={{
-                padding: "7px 12px 7px 30px", borderRadius: 8,
-                background: "var(--bg3)", border: "1px solid var(--border)",
-                color: "var(--text)", fontSize: 13, outline: "none", width: 220,
-              }}
+              className="form-input evisitor-log-search-input"
               placeholder="Search name, company, ID..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -440,7 +439,7 @@ export default function EVisitor({ setActivePage }) {
           </div>
         </div>
 
-        <table className="data-table">
+        <table className="data-table evisitor-log-table">
           <thead>
             <tr>
               <th>Visitor</th>
@@ -479,6 +478,45 @@ export default function EVisitor({ setActivePage }) {
             )}
           </tbody>
         </table>
+
+        <div className="evisitor-log-mobile">
+          {filtered.length > 0 ? filtered.map((v) => (
+            <div key={v.id} className="evisitor-log-item">
+              <div className="evisitor-log-item-top">
+                <div>
+                  <div className="evisitor-log-item-name">{v.name}</div>
+                  <div className="evisitor-log-item-id">{v.id}</div>
+                </div>
+                <StatusBadge status={v.status} />
+              </div>
+              <div className="evisitor-log-item-row">
+                <span className="evisitor-log-item-k">Company</span>
+                <span className="evisitor-log-item-v">{v.company || "—"}</span>
+              </div>
+              <div className="evisitor-log-item-row">
+                <span className="evisitor-log-item-k">Purpose</span>
+                <span className="evisitor-log-item-v"><span className="badge badge-gray">{v.purpose}</span></span>
+              </div>
+              <div className="evisitor-log-item-row">
+                <span className="evisitor-log-item-k">Host</span>
+                <span className="evisitor-log-item-v">{v.host}</span>
+              </div>
+              <div className="evisitor-log-item-row">
+                <span className="evisitor-log-item-k">Visit date</span>
+                <span className="evisitor-log-item-v">{v.visitDate}</span>
+              </div>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm evisitor-log-item-btn"
+                onClick={() => { setSelectedVisitor(v); setView("qr"); }}
+              >
+                <QrCode size={13} style={{ marginRight: 4 }} /> View pass
+              </button>
+            </div>
+          )) : (
+            <div className="evisitor-log-empty">No visitors found</div>
+          )}
+        </div>
       </div>
     </div>
   );
