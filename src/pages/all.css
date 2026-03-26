@@ -1635,3 +1635,328 @@ body {
     width: 100%;
   }
 }
+
+@media (max-width: 768px) {
+ 
+  /* Page Header */
+  .page-header {
+    padding: 16px;
+  }
+ 
+  .page-header .flex-between {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+ 
+  .page-header .btn {
+    align-self: flex-start;
+  }
+ 
+  /* Stats Grid: 2×2 on tablet */
+  .ticket-stats {
+    padding: 0 16px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+ 
+  .ticket-stat-card {
+    padding: 14px 12px 12px;
+    border-radius: 10px;
+  }
+ 
+  .ticket-stat-count {
+    font-size: 26px;
+  }
+ 
+  /* Filters */
+  .ticket-filters {
+    padding: 0 16px;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+ 
+  .ticket-search {
+    width: 100%;
+  }
+ 
+  .ticket-search-row {
+    width: 100%;
+  }
+ 
+  .ticket-status-row {
+    gap: 6px;
+  }
+ 
+  .ticket-status-chip {
+    padding: 5px 11px;
+    font-size: 11px;
+  }
+ 
+  .ticket-select-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+ 
+  .ticket-filter-select {
+    width: calc(50% - 4px);
+    flex: 1 1 120px;
+  }
+ 
+  .ticket-results-count {
+    width: 100%;
+    margin-left: 0;
+    text-align: right;
+  }
+ 
+  /* Ticket List cards */
+  .ticket-list-item {
+    padding: 14px;
+    grid-template-columns: 36px 1fr auto !important;
+    gap: 10px !important;
+    border-radius: 10px !important;
+  }
+ 
+  /* Drawer: full-screen on tablet */
+  .ticket-drawer {
+    width: 100% !important;
+  }
+}
+ 
+/* ── Breakpoint: Mobile (≤480px) ── */
+@media (max-width: 480px) {
+ 
+  /* Page padding */
+  .page-header {
+    padding: 14px 14px 10px;
+  }
+ 
+  /* Stats: 2 columns still, tighter */
+  .ticket-stats {
+    padding: 0 14px;
+    gap: 8px;
+  }
+ 
+  .ticket-stat-card {
+    padding: 12px 10px 10px;
+    border-radius: 9px;
+  }
+ 
+  .ticket-stat-label {
+    font-size: 10px;
+  }
+ 
+  .ticket-stat-count {
+    font-size: 22px;
+    margin: 2px 0 1px;
+  }
+ 
+  .ticket-stat-footer {
+    font-size: 10px;
+  }
+ 
+  /* Filters */
+  .ticket-filters {
+    padding: 0 14px;
+    gap: 8px;
+  }
+ 
+  .ticket-status-row {
+    gap: 5px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+    /* Hide scrollbar visually but keep functional */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+ 
+  .ticket-status-row::-webkit-scrollbar {
+    display: none;
+  }
+ 
+  .ticket-status-chip {
+    flex-shrink: 0;
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+ 
+  .ticket-select-row {
+    gap: 7px;
+  }
+ 
+  .ticket-filter-select {
+    flex: 1 1 0;
+    min-width: 0;
+    font-size: 12px;
+  }
+ 
+  /* Ticket list padding */
+  .ticket-list-wrapper {
+    padding: 0 14px 28px !important;
+  }
+ 
+  /* Ticket card: stack icon + content, hide right column inline */
+  .ticket-list-item {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    padding: 13px 13px !important;
+    border-radius: 10px !important;
+    align-items: flex-start !important;
+  }
+ 
+  .ticket-card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+  }
+ 
+  .ticket-card-icon {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 9px !important;
+    flex-shrink: 0;
+  }
+ 
+  .ticket-card-body {
+    flex: 1;
+    min-width: 0;
+  }
+ 
+  /* Title row: wrap tags below title on tiny screens */
+  .ticket-card-title-row {
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+ 
+  .ticket-card-title {
+    font-size: 13px !important;
+    width: 100%;
+  }
+ 
+  /* Meta row: wrap */
+  .ticket-card-meta {
+    gap: 8px !important;
+    flex-wrap: wrap;
+  }
+ 
+  .ticket-card-meta span {
+    font-size: 11px !important;
+  }
+ 
+  /* Status badge row: move to bottom, full-width row */
+  .ticket-card-status-col {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    gap: 8px !important;
+    flex-shrink: unset !important;
+  }
+ 
+  .ticket-card-status-badge {
+    padding: 4px 11px !important;
+    font-size: 11px !important;
+  }
+ 
+  .ticket-card-sla-label {
+    font-size: 11px !important;
+  }
+ 
+  /* Empty state */
+  .ticket-empty-state {
+    margin: 0 14px;
+    padding: 36px 12px;
+    font-size: 13px;
+    border-radius: 10px;
+  }
+ 
+  /* ── Detail Drawer: full-screen slide-up on mobile ── */
+  .ticket-drawer-overlay {
+    align-items: flex-end !important;
+  }
+ 
+  .ticket-drawer {
+    width: 100% !important;
+    height: 92vh !important;
+    border-radius: 18px 18px 0 0 !important;
+    border-left: none !important;
+    border-top: 1px solid var(--border) !important;
+    animation: slideUp 0.25s ease !important;
+  }
+ 
+  .ticket-drawer-header {
+    padding: 16px 16px 14px !important;
+  }
+ 
+  .ticket-drawer-body {
+    padding: 14px 16px !important;
+    gap: 14px !important;
+  }
+ 
+  /* Two-col grids inside drawer → single col */
+  .ticket-drawer-grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+ 
+  /* New Ticket Modal: full-screen */
+  .new-ticket-modal {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    border: none !important;
+    padding: 20px 16px 28px !important;
+  }
+ 
+  /* New ticket form grids → single col */
+  .new-ticket-modal .form-grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+ 
+  /* Modal action buttons full-width stack */
+  .new-ticket-modal .modal-actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+ 
+  .new-ticket-modal .modal-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+ 
+/* Slide-up animation for mobile drawer */
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+ 
+/* ── Tiny phones (≤360px) ── */
+@media (max-width: 360px) {
+  .ticket-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+    padding: 0 12px;
+  }
+ 
+  .ticket-stat-count {
+    font-size: 20px;
+  }
+ 
+  .ticket-filters {
+    padding: 0 12px;
+  }
+ 
+  .ticket-list-wrapper {
+    padding: 0 12px 24px !important;
+  }
+ 
+  .ticket-drawer {
+    height: 96vh !important;
+  }
+}

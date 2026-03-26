@@ -648,7 +648,7 @@ export default function ServiceTicketsPage() {
         <div style={{ padding: "32px", textAlign: "center", color: "var(--text3)" }}>Loading tickets…</div>
       )}
 
-      <div style={{ padding: "0 32px 32px", display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className="ticket-list-wrapper" style={{ padding: "0 32px 32px", display: "flex", flexDirection: "column", gap: 10 }}>
         {!loading && filtered.length === 0 && (
           <div className="ticket-empty-state">
             No tickets found matching your filters.
@@ -664,18 +664,19 @@ export default function ServiceTicketsPage() {
           return (
             <div
               key={ticket.id}
+              className="ticket-list-item"
               onClick={() => setSelected(ticket)}
               style={{ background: "var(--bg2)", border: "1px solid var(--border)", borderRadius: 12, padding: "16px 18px", cursor: "pointer", display: "grid", gridTemplateColumns: "40px 1fr auto", gap: 14, alignItems: "center", transition: "border-color 0.15s, background 0.15s" }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(91,124,250,0.4)"; e.currentTarget.style.background = "var(--bg3)"; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)";          e.currentTarget.style.background = "var(--bg2)"; }}
             >
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: cat.bg, border: `1px solid ${cat.border}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <div className="ticket-card-icon" style={{ width: 40, height: 40, borderRadius: 10, background: cat.bg, border: `1px solid ${cat.border}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 <cat.icon size={18} color={cat.color} strokeWidth={1.8} />
               </div>
 
-              <div style={{ minWidth: 0 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5, flexWrap: "wrap" }}>
-                  <span style={{ fontWeight: 600, color: "var(--text)", fontSize: 14 }}>{ticket.issue_title}</span>
+              <div className="ticket-card-body" style={{ minWidth: 0 }}>
+                <div className="ticket-card-title-row" style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5, flexWrap: "wrap" }}>
+                  <span className="ticket-card-title" style={{ fontWeight: 600, color: "var(--text)", fontSize: 14 }}>{ticket.issue_title}</span>
                   <span style={{ padding: "2px 8px", borderRadius: 100, background: pri.bg, color: pri.color, fontSize: 11, fontWeight: 600 }}>{ticket.priority}</span>
                   {sla.overdue && (
                     <span style={{ padding: "2px 8px", borderRadius: 100, background: "rgba(248,113,113,0.1)", color: "#f87171", fontSize: 11, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 4 }}>
@@ -683,7 +684,7 @@ export default function ServiceTicketsPage() {
                     </span>
                   )}
                 </div>
-                <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+                <div className="ticket-card-meta" style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
                   <span style={{ fontSize: 12, color: "var(--text3)", display: "inline-flex", alignItems: "center", gap: 4 }}>
                     <MapPin size={11} strokeWidth={2} /> {ticket.location.room}, {ticket.location.floor}
                   </span>
@@ -702,12 +703,12 @@ export default function ServiceTicketsPage() {
                 </div>
               </div>
 
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
-                <div style={{ padding: "4px 12px", borderRadius: 100, background: stat.bg, display: "flex", alignItems: "center", gap: 6 }}>
+              <div className="ticket-card-status-col" style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
+                <div className="ticket-card-status-badge" style={{ padding: "4px 12px", borderRadius: 100, background: stat.bg, display: "flex", alignItems: "center", gap: 6 }}>
                   <div style={{ width: 6, height: 6, borderRadius: "50%", background: stat.dot }} />
                   <span style={{ fontSize: 12, fontWeight: 600, color: stat.color }}>{ticket.status}</span>
                 </div>
-                <span style={{ fontSize: 11, color: sla.color }}>{sla.label}</span>
+                <span className="ticket-card-sla-label" style={{ fontSize: 11, color: sla.color }}>{sla.label}</span>
               </div>
             </div>
           );
