@@ -564,53 +564,83 @@ export default function ServiceTicketsPage() {
       </div>
 
       {/* Summary stats */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, padding: "0 32px", marginBottom: 22 }}>
+      <div className="ticket-stats">
         {[
-          { label: "Open",        val: counts.open,       color: "red"    },
+          { label: "Open", val: counts.open, color: "red" },
           { label: "In Progress", val: counts.inProgress, color: "orange" },
-          { label: "Resolved",    val: counts.resolved,   color: "green"  },
-          { label: "Closed",      val: counts.closed,     color: "gray"   },
-        ].map(s => (
-          <div
-            key={s.label}
-            className="stat-card"
-            style={{ cursor: "pointer", paddingTop: 18, paddingBottom: 18 }}
-            onClick={() => setStatus(s.label === filterStatus ? "All" : s.label)}
-          >
-            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: { red: "var(--danger)", orange: "var(--warning)", green: "var(--accent3)", gray: "var(--text3)" }[s.color] }} />
-            <div style={{ fontSize: 11, color: "var(--text3)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{s.label}</div>
-            <div style={{ fontFamily: "'Syne',sans-serif", fontSize: 30, fontWeight: 800, color: "var(--text)", margin: "4px 0 2px" }}>{s.val}</div>
-            <div style={{ fontSize: 11, color: "var(--text3)" }}>tickets</div>
-          </div>
-        ))}
+          { label: "Resolved", val: counts.resolved, color: "green" },
+          { label: "Closed", val: counts.closed, color: "gray" },
+        ].map((s) => {
+          const underline = { red: "var(--danger)", orange: "var(--warning)", green: "var(--accent3)", gray: "var(--text3)" }[s.color];
+          return (
+            <button
+              key={s.label}
+              type="button"
+              className="ticket-stat-card"
+              style={{ borderTop: `2px solid ${underline}` }}
+              onClick={() => setStatus(s.label === filterStatus ? "All" : s.label)}
+            >
+              <div className="ticket-stat-label">{s.label}</div>
+              <div className="ticket-stat-count">{s.val}</div>
+              <div className="ticket-stat-footer">tickets</div>
+            </button>
+          );
+        })}
       </div>
 
       {/* Filters */}
-      <div style={{ padding: "0 32px", marginBottom: 16, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-        <div style={{ position: "relative", width: 220 }}>
-          <Search size={14} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "var(--text3)", pointerEvents: "none" }} />
-          <input className="form-input" style={{ width: "100%", paddingLeft: 30 }} placeholder="Search tickets..." value={search} onChange={e => setSearch(e.target.value)} />
+      <div className="ticket-filters">
+        <div className="ticket-search-row">
+          <div className="ticket-search">
+            <Search size={14} className="ticket-search-icon" />
+            <input
+              className="form-input ticket-search-input"
+              placeholder="Search tickets..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
         </div>
-        <div style={{ display: "flex", gap: 4 }}>
-          {statuses.map(s => {
-            const sc = STATUS_CONFIG[s];
+
+        <div className="ticket-status-row">
+          {statuses.map((s) => {
+            const isAll = s === "All";
+            const sc = STATUS_CONFIG[s] || { color: "var(--accent)", bg: "rgba(91,124,250,0.12)", dot: "var(--accent)" };
+            const active = filterStatus === s;
             return (
-              <button key={s} onClick={() => setStatus(s)} style={{ background: filterStatus === s ? (sc?.bg || "rgba(91,124,250,0.12)") : "var(--bg2)", border: `1px solid ${filterStatus === s ? (sc?.dot || "var(--accent)") : "var(--border)"}`, color: filterStatus === s ? (sc?.color || "var(--accent)") : "var(--text2)", borderRadius: 100, padding: "5px 12px", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s", display: "flex", alignItems: "center", gap: 5 }}>
-                {sc && <div style={{ width: 6, height: 6, borderRadius: "50%", background: sc.dot }} />}
+              <button
+                key={s}
+                type="button"
+                className="ticket-status-chip"
+                onClick={() => setStatus(s)}
+                style={{
+                  background: active ? sc.bg : "var(--bg2)",
+                  border: `1px solid ${active ? sc.dot : "var(--border)"}`,
+                  color: active ? sc.color : "var(--text2)",
+                }}
+              >
+                {!isAll && <div className="ticket-status-dot" style={{ background: sc.dot }} />}
                 {s}
               </button>
             );
           })}
         </div>
-        <select className="form-select" style={{ width: 130 }} value={filterCat} onChange={e => setCat(e.target.value)}>
-          {categories.map(c => <option key={c}>{c}</option>)}
-        </select>
-        <select className="form-select" style={{ width: 120 }} value={filterPri} onChange={e => setPri(e.target.value)}>
-          {priorities.map(p => <option key={p}>{p}</option>)}
-        </select>
-        <span style={{ fontSize: 12, color: "var(--text3)", marginLeft: "auto" }}>
-          {filtered.length} result{filtered.length !== 1 ? "s" : ""}
-        </span>
+
+        <div className="ticket-select-row">
+          <select className="form-select ticket-filter-select" value={filterCat} onChange={(e) => setCat(e.target.value)}>
+            {categories.map((c) => (
+              <option key={c}>{c}</option>
+            ))}
+          </select>
+          <select className="form-select ticket-filter-select" value={filterPri} onChange={(e) => setPri(e.target.value)}>
+            {priorities.map((p) => (
+              <option key={p}>{p}</option>
+            ))}
+          </select>
+          <div className="ticket-results-count">
+            {filtered.length} result{filtered.length !== 1 ? "s" : ""}
+          </div>
+        </div>
       </div>
 
       {/* Ticket List */}
@@ -620,7 +650,7 @@ export default function ServiceTicketsPage() {
 
       <div style={{ padding: "0 32px 32px", display: "flex", flexDirection: "column", gap: 10 }}>
         {!loading && filtered.length === 0 && (
-          <div style={{ textAlign: "center", padding: "48px 0", color: "var(--text3)", fontSize: 14, background: "var(--bg2)", border: "1px solid var(--border)", borderRadius: 12 }}>
+          <div className="ticket-empty-state">
             No tickets found matching your filters.
           </div>
         )}

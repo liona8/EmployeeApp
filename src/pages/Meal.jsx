@@ -95,7 +95,7 @@ export default function Meal({ setActivePage }) {
   // ── Order Success Screen ──────────────────────────────────────────────────
   if (orderPlaced) {
     return (
-      <div style={{ padding: "0 32px 32px 24px", maxWidth: "1400px" }}>
+      <div className="meal-page">
         <div className="page-header">
           <div className="flex-between">
             <div>
@@ -108,7 +108,7 @@ export default function Meal({ setActivePage }) {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        <div className="meal-success-grid">
           <div className="card" style={{ textAlign: "center", padding: "32px 24px" }}>
             <div style={{ fontSize: 56, marginBottom: 12 }}>🍽️</div>
             <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Order Placed!</div>
@@ -171,7 +171,7 @@ export default function Meal({ setActivePage }) {
 
   // ── Main View ─────────────────────────────────────────────────────────────
   return (
-    <div style={{ padding: "0 32px 32px 24px", maxWidth: "1400px" }}>
+    <div className="meal-page">
       <div className="page-header">
         <div className="flex-between">
           <div>
@@ -238,7 +238,7 @@ export default function Meal({ setActivePage }) {
         </div>
       ) : (
         // ── Order tab ─────────────────────────────────────────────────────
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 24 }}>
+        <div className="page-grid-two-col" style={{ display: "grid", "--page-grid-cols": "1fr 340px", gap: 24 }}>
           {/* Menu */}
           <div>
             {/* Session selector */}
@@ -246,16 +246,16 @@ export default function Meal({ setActivePage }) {
               <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text3)", marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.6px" }}>
                 Select Session
               </div>
-              <div style={{ display: "flex", gap: 8 }}>
+              <div className="meal-session-row">
                 {ORDER_SESSIONS.map((s) => (
                   <button
                     key={s.label}
+                    type="button"
                     onClick={() => setSelectedSession(s.label)}
-                    className={selectedSession === s.label ? "btn btn-primary btn-sm" : "btn btn-ghost btn-sm"}
-                    style={{ flexDirection: "column", alignItems: "flex-start", padding: "10px 14px", height: "auto", lineHeight: 1.4 }}
+                    className={`meal-session-btn ${selectedSession === s.label ? "btn btn-primary btn-sm" : "btn btn-ghost btn-sm"}`}
                   >
-                    <span style={{ fontWeight: 700 }}>{s.label}</span>
-                    <span style={{ fontSize: 11, opacity: 0.75 }}>{s.time}</span>
+                    <span className="meal-session-label">{s.label}</span>
+                    <span className="meal-session-time">{s.time}</span>
                   </button>
                 ))}
               </div>
@@ -265,7 +265,7 @@ export default function Meal({ setActivePage }) {
             </div>
 
             {/* Category tabs */}
-            <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+            <div className="meal-category-tabs">
               {categories.map((cat) => (
                 <button
                   key={cat}
@@ -279,20 +279,24 @@ export default function Meal({ setActivePage }) {
             </div>
 
             {/* Menu items */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            <div className="meal-menu-grid">
               {MENU[activeCategory].map((item) => {
                 const qty = cart[item.id] || 0;
                 return (
-                  <div key={item.id} style={{
-                    background: "var(--surface, var(--bg2))",
-                    border: `1px solid ${qty > 0 ? "var(--accent)" : "var(--border)"}`,
-                    borderRadius: 10, padding: "14px 16px",
-                    transition: "border-color 0.15s",
-                    position: "relative",
-                  }}>
+                  <div
+                    key={item.id}
+                    className="meal-item-card"
+                    style={{
+                      background: "var(--surface, var(--bg2))",
+                      border: `1px solid ${qty > 0 ? "var(--accent)" : "var(--border)"}`,
+                      borderRadius: 10,
+                      transition: "border-color 0.15s",
+                      position: "relative",
+                    }}
+                  >
                     {item.popular && (
                       <span style={{
-                        position: "absolute", top: 10, right: 10,
+                        position: "absolute", top: 10, right: 12,
                         fontSize: 10, fontWeight: 700, padding: "2px 7px",
                         background: "rgba(79,110,247,0.15)", color: "var(--accent)",
                         borderRadius: 4,
@@ -301,8 +305,8 @@ export default function Meal({ setActivePage }) {
                     <div style={{ fontSize: 24, marginBottom: 6 }}>{item.tag}</div>
                     <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 2 }}>{item.name}</div>
                     <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 10, lineHeight: 1.4 }}>{item.desc}</div>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <span style={{ fontWeight: 700, fontSize: 14, color: "var(--accent)" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, minWidth: 0 }}>
+                      <span style={{ fontWeight: 700, fontSize: 14, color: "var(--accent)", minWidth: 0, flexShrink: 1 }}>
                         RM {item.price.toFixed(2)}
                       </span>
                       {qty === 0 ? (
@@ -313,13 +317,13 @@ export default function Meal({ setActivePage }) {
                       ) : (
                         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                           <button onClick={() => removeFromCart(item.id)}
-                            style={{ width: 26, height: 26, borderRadius: "50%", border: "1px solid var(--border)", background: "var(--bg3)", cursor: "pointer", color: "var(--text)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <Minus size={12} />
+                            style={{ width: 26, height: 26, borderRadius: "50%", border: "1px solid var(--border)", background: "var(--bg3)", cursor: "pointer", color: "var(--text)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 700, lineHeight: 1 }}>
+                            −
                           </button>
                           <span style={{ fontWeight: 700, fontSize: 14, minWidth: 16, textAlign: "center" }}>{qty}</span>
                           <button onClick={() => addToCart(item.id)}
-                            style={{ width: 26, height: 26, borderRadius: "50%", background: "var(--accent)", border: "none", cursor: "pointer", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <Plus size={12} />
+                            style={{ width: 26, height: 26, borderRadius: "50%", background: "var(--accent)", border: "none", cursor: "pointer", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 700, lineHeight: 1 }}>
+                            +
                           </button>
                         </div>
                       )}
@@ -331,7 +335,7 @@ export default function Meal({ setActivePage }) {
           </div>
 
           {/* Cart */}
-          <div style={{ position: "sticky", top: 20, alignSelf: "start" }}>
+          <div className="meal-cart-column">
             <div className="card">
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
                 <ShoppingCart size={16} />

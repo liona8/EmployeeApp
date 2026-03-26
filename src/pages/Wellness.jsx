@@ -206,18 +206,14 @@ export default function Wellness({ setActivePage }) {
   };
 
   return (
-    <div style={{ position: "relative", padding: "0 32px 32px 24px", maxWidth: "1400px" }}>
+    <div className="wellness-page" style={{ position: "relative", padding: "0 32px 32px 24px", maxWidth: "1400px" }}>
 
       {/* Toast */}
       {toast && (
-        <div style={{
-          position: "fixed", bottom: 28, right: 28, zIndex: 9999,
-          padding: "12px 20px", borderRadius: 10, fontSize: 13, fontWeight: 500,
+        <div className="app-toast" style={{
           background: toast.type === "success" ? "#34d399" : toast.type === "warn" ? "#f59e0b" : "var(--bg2)",
           color: toast.type === "info" ? "var(--text)" : "#0f1117",
           border: toast.type === "info" ? "1px solid var(--border)" : "none",
-          boxShadow: "0 4px 24px rgba(0,0,0,0.25)",
-          animation: "slideUp 0.25s ease",
         }}>
           {toast.msg}
         </div>
@@ -238,7 +234,7 @@ export default function Wellness({ setActivePage }) {
       </div>
 
       {/* Stats row */}
-      <div className="stat-grid" style={{ marginBottom: 20 }}>
+      <div className="stat-grid wellness-stat-grid" style={{ marginBottom: 20 }}>
         {WELLNESS_STATS.map(({ label, value, icon, cls }) => (
           <div key={label} className={`stat-card ${cls}`}>
             <div className="stat-icon">{icon}</div>
@@ -248,7 +244,10 @@ export default function Wellness({ setActivePage }) {
         ))}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 24 }}>
+      <div
+        className="page-grid-two-col"
+        style={{ display: "grid", "--page-grid-cols": "1fr 320px", gap: 24 }}
+      >
 
         {/* Left — program list */}
         <div>
@@ -266,6 +265,64 @@ export default function Wellness({ setActivePage }) {
             ))}
           </div>
 
+          {/* Mobile: compact sidebar summary */}
+          <div className="chart-mobile-only" style={{ marginBottom: 16 }}>
+            <div className="card">
+              {/* Upcoming reminders */}
+              {UPCOMING_REMINDERS.filter(r => reminders.has(r.id)).length > 0 && (
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: "var(--text3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+                    <Bell size={12} /> Upcoming Reminders
+                  </div>
+                  {UPCOMING_REMINDERS.filter(r => reminders.has(r.id)).map(r => (
+                    <div key={r.id} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
+                      <span style={{ fontSize: 16 }}>{r.emoji}</span>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text)" }}>{r.title}</span>
+                      <span style={{ fontSize: 11, color: "#f59e0b", marginLeft: "auto" }}>🔔 {r.time}</span>
+                    </div>
+                  ))}
+                  <div style={{ height: 1, background: "var(--border)", margin: "10px 0 0" }} />
+                </div>
+              )}
+
+              {/* My enrolled */}
+              {enrolled.size > 0 && (
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: "var(--text3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
+                    My Programs
+                  </div>
+                  {programs.filter(p => enrolled.has(p.id)).map(p => (
+                    <div key={p.id} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
+                      <span style={{ fontSize: 16 }}>{p.emoji}</span>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text)" }}>{p.title}</span>
+                      <span className="wp-card-badge" style={{ marginLeft: "auto", background: `${p.categoryColor}18`, color: p.categoryColor }}>
+                        {p.category}
+                      </span>
+                    </div>
+                  ))}
+                  <div style={{ height: 1, background: "var(--border)", margin: "10px 0 0" }} />
+                </div>
+              )}
+
+              {/* Tips */}
+              <div style={{ fontSize: 10, fontWeight: 600, color: "#34d399", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
+                💡 Wellness Tips
+              </div>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {[
+                  "Drink 8 glasses of water daily",
+                  "Stretch every hour",
+                  "Sleep 7–8 hours",
+                  "Try something new!",
+                ].map((tip, i) => (
+                  <span key={i} style={{ fontSize: 11, padding: "4px 10px", borderRadius: 20, background: "rgba(52,211,153,0.08)", border: "1px solid rgba(52,211,153,0.15)", color: "var(--text2)" }}>
+                    {tip}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
           {/* Program cards */}
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {filtered.map((prog) => {
@@ -278,6 +335,7 @@ export default function Wellness({ setActivePage }) {
               return (
                 <div
                   key={prog.id}
+                  className="wp-card"
                   onClick={() => setExpandedId(isExpanded ? null : prog.id)}
                   style={{
                     borderRadius: 12,
@@ -288,89 +346,79 @@ export default function Wellness({ setActivePage }) {
                     overflow: "hidden",
                   }}
                 >
-                  {/* Card top */}
-                  <div style={{ padding: "14px 16px", display: "flex", gap: 14, alignItems: "flex-start" }}>
-                    {/* Emoji avatar */}
-                    <div style={{
-                      width: 48, height: 48, borderRadius: 12, flexShrink: 0,
-                      background: `${prog.categoryColor}18`,
-                      border: `1px solid ${prog.categoryColor}30`,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 24,
-                    }}>
-                      {prog.emoji}
-                    </div>
-
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      {/* Title row */}
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 4 }}>
-                        <span style={{ fontWeight: 700, fontSize: 14, color: "var(--text)" }}>{prog.title}</span>
-                        <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 20, background: `${prog.categoryColor}18`, color: prog.categoryColor, border: `1px solid ${prog.categoryColor}30` }}>
-                          {prog.category}
-                        </span>
-                        <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 20, background: diff.bg, color: diff.color }}>
-                          {prog.difficulty}
-                        </span>
-                        {isEnrolled && (
-                          <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 20, background: "rgba(52,211,153,0.15)", color: "#34d399", border: "1px solid rgba(52,211,153,0.3)" }}>
-                            ✓ Enrolled
-                          </span>
-                        )}
+                  <div className="wp-card-body">
+                    {/* Row 1: avatar + title + actions */}
+                    <div className="wp-card-header">
+                      <div className="wp-card-avatar" style={{
+                        background: `${prog.categoryColor}18`,
+                        border: `1px solid ${prog.categoryColor}30`,
+                      }}>
+                        {prog.emoji}
                       </div>
 
-                      {/* Meta row */}
-                      <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-                        <span style={{ fontSize: 12, color: "var(--text3)", display: "flex", alignItems: "center", gap: 4 }}>
-                          <Clock size={12} /> {prog.time}
-                        </span>
-                        <span style={{ fontSize: 12, color: "var(--text3)", display: "flex", alignItems: "center", gap: 4 }}>
-                          <Calendar size={12} /> {prog.schedule}
-                        </span>
-                        <span style={{ fontSize: 12, color: "var(--text3)", display: "flex", alignItems: "center", gap: 4 }}>
-                          <MapPin size={12} /> {prog.location}
-                        </span>
+                      <div className="wp-card-title-group">
+                        <span className="wp-card-title">{prog.title}</span>
                       </div>
 
-                      {/* Next session + spots */}
-                      <div style={{ display: "flex", gap: 14, marginTop: 6, alignItems: "center" }}>
-                        <span style={{ fontSize: 12, fontWeight: 600, color: "var(--accent)" }}>
-                          Next: {prog.nextSessionLabel}
-                        </span>
-                        <span style={{ fontSize: 11, fontWeight: 600, color: spotsColor(prog) }}>
-                          {isFull ? "● Full" : `● ${spotsLeft(prog)} spot${spotsLeft(prog) !== 1 ? "s" : ""} left`}
-                        </span>
-                        <span style={{ fontSize: 11, color: "var(--text3)" }}>
-                          <Users size={11} style={{ marginRight: 3, verticalAlign: "middle" }} />
-                          {prog.enrolled}/{prog.slots}
-                        </span>
+                      <div className="wp-card-actions" onClick={e => e.stopPropagation()}>
+                        <button
+                          onClick={() => toggleReminder(prog.id, { stopPropagation: () => {} })}
+                          className="btn btn-ghost btn-sm"
+                          style={{
+                            fontSize: 11, padding: "5px 10px",
+                            color: hasReminder ? "#f59e0b" : "var(--text3)",
+                            borderColor: hasReminder ? "rgba(245,158,11,0.4)" : "var(--border)",
+                            background: hasReminder ? "rgba(245,158,11,0.08)" : undefined,
+                          }}
+                          title={hasReminder ? "Remove reminder" : "Set reminder"}
+                        >
+                          {hasReminder ? <Bell size={13} /> : <BellOff size={13} />}
+                          <span style={{ marginLeft: 4 }}>{hasReminder ? "On" : "Off"}</span>
+                        </button>
+                        <button
+                          onClick={() => toggleEnroll(prog.id)}
+                          className={isEnrolled ? "btn btn-danger btn-sm" : "btn btn-primary btn-sm"}
+                          style={{ fontSize: 11, padding: "5px 10px", whiteSpace: "nowrap" }}
+                        >
+                          {isEnrolled ? "Leave" : isFull ? "Waitlist" : "Join"}
+                        </button>
                       </div>
                     </div>
 
-                    {/* Action buttons */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: 6, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
-                      <button
-                        onClick={() => toggleReminder(prog.id, { stopPropagation: () => {} })}
-                        className="btn btn-ghost btn-sm"
-                        style={{
-                          fontSize: 11, padding: "5px 10px",
-                          color: hasReminder ? "#f59e0b" : "var(--text3)",
-                          borderColor: hasReminder ? "rgba(245,158,11,0.4)" : "var(--border)",
-                          background: hasReminder ? "rgba(245,158,11,0.08)" : undefined,
-                        }}
-                        title={hasReminder ? "Remove reminder" : "Set reminder"}
-                      >
-                        {hasReminder ? <Bell size={13} /> : <BellOff size={13} />}
-                        <span style={{ marginLeft: 4 }}>{hasReminder ? "On" : "Off"}</span>
-                      </button>
-                      <button
-                        onClick={() => toggleEnroll(prog.id)}
-                        className={isEnrolled ? "btn btn-ghost btn-sm" : "btn btn-primary btn-sm"}
-                        style={{ fontSize: 11, padding: "5px 10px", whiteSpace: "nowrap",
-                          ...(isEnrolled ? { borderColor: "rgba(52,211,153,0.4)", color: "#34d399" } : {}),
-                        }}
-                      >
-                        {isEnrolled ? "✓ Leave" : isFull ? "Waitlist" : "Join"}
-                      </button>
+                    {/* Row 2: badges */}
+                    <div className="wp-card-badges">
+                      <span className="wp-card-badge" style={{ background: `${prog.categoryColor}18`, color: prog.categoryColor, border: `1px solid ${prog.categoryColor}30` }}>
+                        {prog.category}
+                      </span>
+                      <span className="wp-card-badge" style={{ background: diff.bg, color: diff.color }}>
+                        {prog.difficulty}
+                      </span>
+                      {isEnrolled && (
+                        <span className="wp-card-badge" style={{ background: "rgba(52,211,153,0.15)", color: "#34d399", border: "1px solid rgba(52,211,153,0.3)" }}>
+                          ✓ Enrolled
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Row 3: meta */}
+                    <div className="wp-card-meta">
+                      <span><Clock size={12} /> {prog.time}</span>
+                      <span><Calendar size={12} /> {prog.schedule}</span>
+                      <span><MapPin size={12} /> {prog.location}</span>
+                    </div>
+
+                    {/* Row 4: next session + spots */}
+                    <div className="wp-card-footer">
+                      <span style={{ fontWeight: 600, color: "var(--accent)" }}>
+                        Next: {prog.nextSessionLabel}
+                      </span>
+                      <span style={{ fontWeight: 600, color: spotsColor(prog) }}>
+                        {isFull ? "● Full" : `● ${spotsLeft(prog)} spot${spotsLeft(prog) !== 1 ? "s" : ""} left`}
+                      </span>
+                      <span style={{ color: "var(--text3)" }}>
+                        <Users size={11} style={{ marginRight: 3, verticalAlign: "middle" }} />
+                        {prog.enrolled}/{prog.slots}
+                      </span>
                     </div>
                   </div>
 
@@ -414,8 +462,8 @@ export default function Wellness({ setActivePage }) {
           </div>
         </div>
 
-        {/* Right sidebar */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        {/* Right sidebar — hidden on mobile */}
+        <div className="chart-desktop-sidebar" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
           {/* Upcoming reminders */}
           <div className="card">

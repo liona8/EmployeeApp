@@ -144,6 +144,7 @@ body {
 /* ── Main Content ── */
 .main-content {
   flex: 1;
+  min-width: 0; /* flex child: allow shrink so horizontal padding isn’t clipped */
   overflow-y: auto;
   background: var(--bg);
 }
@@ -151,7 +152,7 @@ body {
 /* ── Page Header ── */
 .page-header {
   padding: 28px 32px 0;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 .page-title {
   font-family: 'Poppins', sans-serif;
@@ -160,6 +161,12 @@ body {
   color: var(--text);
 }
 .page-subtitle { color: var(--text2); font-size: 13px; margin-top: 4px; }
+
+/* Documents page header wrapper */
+.documents-header {
+  margin-top: 12px;
+  margin-bottom: 16px;
+}
 
 /* ── Cards ── */
 .card {
@@ -235,6 +242,330 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+/* Calendar page wrapper spacing */
+.calendar-page-grid {
+  padding: 0 32px 32px;
+}
+
+/* ── e-Visitor page ── */
+.evisitor-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 32px 32px;
+  box-sizing: border-box;
+}
+.evisitor-page .stat-grid {
+  padding-left: 0;
+  padding-right: 0;
+}
+.evisitor-qr-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.evisitor-form-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+.evisitor-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ── Meal ordering ── */
+.meal-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 32px 32px;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+}
+
+.meal-page .page-grid-two-col {
+  min-width: 0;
+  max-width: 100%;
+}
+.meal-page .page-grid-two-col > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.meal-page .card {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.meal-session-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.meal-session-btn {
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 10px 14px;
+  height: auto;
+  line-height: 1.35;
+  box-sizing: border-box;
+}
+.meal-session-btn .meal-session-label {
+  font-weight: 700;
+}
+.meal-session-btn .meal-session-time {
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+.meal-category-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  flex-wrap: nowrap;
+  padding-bottom: 4px;
+}
+.meal-category-tabs .btn {
+  white-space: nowrap;
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.meal-menu-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.meal-item-card {
+  padding: 14px 16px;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.meal-success-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.meal-cart-column {
+  position: sticky;
+  top: 20px;
+  align-self: start;
+}
+
+/* ── Chart page header ── */
+.chart-page-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.chart-logo-text {
+  font-weight: 900;
+  letter-spacing: -1px;
+  background: linear-gradient(135deg, #5b7cfa, #a78bfa);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.chart-title-sub {
+  font-weight: 400;
+  font-size: 16px;
+  color: var(--text2);
+  -webkit-text-fill-color: unset;
+}
+
+/* ── Chart page sidebar reflow ── */
+.chart-mobile-only {
+  display: none;
+}
+.chart-desktop-sidebar {
+  display: flex;
+}
+.chart-modules-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.chart-history-stats {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+}
+.chart-history-mobile-card {
+  display: none;
+}
+
+/* ── Wellness program cards ── */
+.wp-card-body {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.wp-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.wp-card-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+.wp-card-title-group {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.wp-card-title {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text);
+}
+.wp-card-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.wp-card-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  align-items: center;
+}
+.wp-card-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding-left: 56px;
+}
+.wp-card-meta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding-left: 56px;
+}
+.wp-card-meta > span {
+  font-size: 12px;
+  color: var(--text3);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.wp-card-footer {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding-left: 56px;
+  font-size: 12px;
+}
+
+.evisitor-log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.evisitor-log-search {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+  max-width: 280px;
+}
+.evisitor-log-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text3);
+  pointer-events: none;
+}
+.evisitor-log-search-input {
+  width: 100%;
+}
+
+.evisitor-log-mobile {
+  display: none;
+}
+.evisitor-log-item {
+  padding: 14px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.evisitor-log-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.evisitor-log-item-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+}
+.evisitor-log-item-id {
+  font-size: 11px;
+  color: var(--text3);
+  font-family: ui-monospace, monospace;
+  margin-top: 2px;
+}
+.evisitor-log-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.evisitor-log-item-row:last-of-type {
+  border-bottom: none;
+}
+.evisitor-log-item-k {
+  color: var(--text3);
+  font-size: 12px;
+  flex-shrink: 0;
+  min-width: 88px;
+}
+.evisitor-log-item-v {
+  color: var(--text2);
+  text-align: right;
+}
+.evisitor-log-item-btn {
+  width: 100%;
+  margin-top: 12px;
+  justify-content: center;
+}
+.evisitor-log-empty {
+  text-align: center;
+  color: var(--text3);
+  padding: 24px;
+  font-size: 14px;
 }
 
 /* ── Badges / Status ── */
@@ -318,6 +649,10 @@ body {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(91, 124, 250, 0.1);
 }
+/* Must come after .form-input — that rule’s padding shorthand was overriding padding-left */
+.form-input.evisitor-log-search-input {
+  padding: 8px 12px 8px 38px;
+}
 .form-textarea { resize: vertical; min-height: 80px; }
 .form-select { appearance: none; cursor: pointer; }
 
@@ -365,6 +700,65 @@ body {
 .cal-day.leave-day { background: rgba(167, 139, 250, 0.1); color: var(--accent2); }
 
 /* ── Chat ── */
+.chat-header {
+  padding: 20px 32px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: nowrap;
+  background: var(--bg2);
+}
+.chat-header-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+.chat-header-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.chat-header-text {
+  min-width: 0;
+}
+.chat-header-title {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text);
+  line-height: 1.25;
+}
+.chat-header-status {
+  font-size: 12px;
+  color: var(--accent3);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+}
+.chat-header-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent3);
+  flex-shrink: 0;
+}
+.chat-header-powered {
+  margin: 0;
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text3);
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
 .chat-container {
   display: flex;
   flex-direction: column;
@@ -489,11 +883,180 @@ body {
 }
 
 /* ── Leave Page ── */
+.leave-tabs {
+  padding: 0 32px;
+}
+.leave-history-section {
+  padding: 0 32px 32px;
+}
+.leave-history-mobile {
+  display: none;
+}
 .leave-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
   padding: 0 32px 32px;
+}
+
+/* ── Leave Management Entitlements (same stat-card pattern as Service Tickets) ── */
+.leave-entitlements-section {
+  padding: 0 32px 32px;
+}
+.ticket-stats.leave-entitlement-stats {
+  grid-template-columns: repeat(3, 1fr);
+}
+.leave-entitlement-meta {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 6px;
+  line-height: 1.35;
+}
+.leave-entitlement-carry {
+  font-size: 11px;
+  color: var(--warning);
+  margin-top: 6px;
+  line-height: 1.35;
+}
+
+/* Leave "Balance" tab policy notes spacing */
+.leave-policy-notes {
+  margin-top: 16px;
+}
+
+.leave-policy-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+/* ── Service Tickets (ServiceTicketPage) ── */
+.ticket-stats {
+  padding: 0 32px;
+  margin-bottom: 14px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.ticket-stat-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg2);
+  padding: 16px 14px 14px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  text-align: left;
+}
+
+.ticket-stat-card:hover {
+  border-color: rgba(91, 124, 250, 0.5);
+  background: var(--bg3);
+}
+
+.ticket-stat-label {
+  font-size: 11px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.ticket-stat-count {
+  font-family: "Syne", sans-serif;
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 4px 0 2px;
+}
+
+.ticket-stat-footer {
+  font-size: 11px;
+  color: var(--text3);
+}
+
+.ticket-filters {
+  padding: 0 32px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ticket-search-row {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.ticket-search {
+  position: relative;
+  width: 240px;
+}
+
+.ticket-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text3);
+  pointer-events: none;
+}
+
+.ticket-search-input {
+  width: 100%;
+  padding-left: 32px;
+}
+
+.ticket-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ticket-status-chip {
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: "DM Sans", sans-serif;
+  border: 1px solid var(--border);
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ticket-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.ticket-select-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ticket-filter-select {
+  width: 140px;
+}
+
+.ticket-results-count {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text3);
+}
+
+.ticket-empty-state {
+  text-align: center;
+  padding: 48px 16px;
+  color: var(--text3);
+  font-size: 14px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
 }
 
 /* ── Activity Feed ── */
@@ -546,6 +1109,21 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
+/* ── Toast notification ── */
+.app-toast {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 9999;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.25s ease;
+  max-width: 360px;
+}
+
 /* ── Separator ── */
 .section-divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
 
@@ -561,3 +1139,499 @@ body {
 .text-dim { color: var(--text3); }
 .font-bold { font-weight: 700; }
 .font-syne { font-family: 'Poppins', sans-serif; }
+
+/* ── Mobile Responsive ─────────────────────────────────────────────── */
+.mobile-topbar {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  z-index: 40;
+  align-items: center;
+  padding: 0 12px;
+}
+.mobile-brand-logo {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 30px;
+  width: auto;
+  user-select: none;
+  pointer-events: none;
+}
+
+.mobile-sidebar-toggle {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.mobile-sidebar-toggle:hover {
+  background: var(--bg3);
+}
+
+.mobile-sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+/* Used by pages that currently render: `gridTemplateColumns: "1fr <fixed>px"` */
+.page-grid-two-col {
+  grid-template-columns: var(--page-grid-cols, 1fr 340px);
+}
+
+@media (max-width: 768px) {
+  /* Shared page padding/spacing */
+  .mobile-topbar {
+    display: flex;
+  }
+
+  .main-content {
+    padding-top: 56px;
+  }
+
+  .page-header {
+    padding: 12px 16px 0;
+    margin-bottom: 14px;
+  }
+
+  /* Make page headers behave nicely on mobile */
+  .page-header .flex-between {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .page-header .flex-gap {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .page-title {
+    font-size: 20px;
+    line-height: 1.2;
+  }
+  .stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 0 16px;
+    margin-top: 12px;
+  }
+  .content-grid {
+    grid-template-columns: 1fr;
+    padding: 0 16px 16px;
+  }
+
+  .calendar-page-grid {
+    padding: 0 16px 16px;
+  }
+  .app-toast {
+    right: 16px;
+    left: 16px;
+    bottom: 20px;
+    max-width: none;
+    text-align: center;
+  }
+
+  .leave-page .page-header {
+    padding: 12px 16px 0;
+  }
+  .leave-tabs {
+    padding: 0 16px;
+    overflow-x: auto;
+  }
+  .leave-grid {
+    grid-template-columns: 1fr;
+    padding: 0 16px 16px;
+  }
+  .leave-history-section {
+    padding: 0 16px 16px;
+  }
+  .leave-history-table {
+    display: none;
+  }
+  .leave-history-mobile {
+    display: block;
+  }
+
+  .leave-entitlements-section {
+    padding: 0 16px 16px;
+  }
+
+  .leave-policy-notes {
+    margin-top: 12px;
+  }
+
+  /* Mobile-only: policy notes row-by-row */
+  .leave-policy-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ticket-stats {
+    padding: 0 16px;
+    gap: 12px;
+    margin-bottom: 10px;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ticket-stats.leave-entitlement-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ticket-stat-card {
+    padding: 14px 10px 12px;
+    border-radius: 10px;
+  }
+
+  .ticket-stat-count {
+    font-size: 24px;
+  }
+
+  /* e-Visitor: page inset + 2×2 stats (same rhythm as Service Tickets) */
+  .evisitor-page {
+    padding: 0 16px 16px;
+    max-width: 100%;
+  }
+  .evisitor-qr-grid,
+  .evisitor-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .evisitor-form-row {
+    grid-template-columns: 1fr;
+  }
+  .stat-grid.evisitor-stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 0;
+    margin-bottom: 16px;
+  }
+  .stat-grid.evisitor-stat-grid .stat-card {
+    padding: 14px 12px;
+    min-width: 0;
+  }
+  .stat-grid.evisitor-stat-grid .stat-label {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    line-height: 1.25;
+    padding-right: 20px;
+  }
+  .stat-grid.evisitor-stat-grid .stat-value {
+    font-size: 26px;
+    margin: 6px 0 4px;
+  }
+  .stat-grid.evisitor-stat-grid .stat-icon {
+    font-size: 16px;
+    top: 12px;
+    right: 10px;
+    opacity: 0.2;
+  }
+
+  /* Wellness page — mobile */
+  .wellness-page {
+    padding: 0 16px 16px !important;
+  }
+  .wellness-page .page-header {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .stat-grid.wellness-stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 0;
+    margin-bottom: 16px;
+  }
+  .stat-grid.wellness-stat-grid .stat-card {
+    padding: 14px 12px;
+    min-width: 0;
+  }
+  .stat-grid.wellness-stat-grid .stat-label {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    line-height: 1.25;
+    padding-right: 20px;
+  }
+  .stat-grid.wellness-stat-grid .stat-value {
+    font-size: 26px;
+    margin: 6px 0 4px;
+  }
+  .stat-grid.wellness-stat-grid .stat-icon {
+    font-size: 16px;
+    top: 12px;
+    right: 10px;
+    opacity: 0.2;
+  }
+
+  /* Wellness program cards — mobile */
+  .wp-card-header {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .wp-card-title-group {
+    flex: 1 1 0%;
+    min-width: 0;
+  }
+  .wp-card-actions {
+    flex-shrink: 0;
+  }
+  .wp-card-badges,
+  .wp-card-meta,
+  .wp-card-footer {
+    padding-left: 0;
+  }
+  .wp-card-meta {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  /* Chart (CHART) page — mobile */
+  .chart-page {
+    padding: 0 16px 16px !important;
+  }
+  .chart-page .page-header {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .chart-page-subtitle {
+    display: none;
+  }
+  .chart-title-sub {
+    font-size: 13px !important;
+  }
+  .stat-grid.chart-stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 0;
+    margin-bottom: 16px;
+  }
+  .stat-grid.chart-stat-grid .stat-card {
+    padding: 14px 12px;
+    min-width: 0;
+  }
+  .stat-grid.chart-stat-grid .stat-label {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    line-height: 1.25;
+    padding-right: 20px;
+  }
+  .stat-grid.chart-stat-grid .stat-value {
+    font-size: 26px;
+    margin: 6px 0 4px;
+  }
+  .stat-grid.chart-stat-grid .stat-icon {
+    font-size: 16px;
+    top: 12px;
+    right: 10px;
+    opacity: 0.2;
+  }
+  .chart-mobile-only {
+    display: block !important;
+  }
+  .chart-desktop-sidebar {
+    display: none !important;
+  }
+  .chart-modules-grid {
+    grid-template-columns: 1fr;
+  }
+  .chart-history-stats {
+    gap: 16px;
+  }
+  .chart-history-stats > div {
+    font-size: 12px;
+  }
+  .chart-history-table-card {
+    display: none;
+  }
+  .chart-history-mobile-card {
+    display: block;
+  }
+
+  .evisitor-log-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .evisitor-log-search {
+    max-width: none;
+  }
+  .evisitor-log-table {
+    display: none;
+  }
+  .evisitor-log-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .ticket-filters {
+    padding: 0 16px;
+  }
+
+  .ticket-search {
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .ticket-select-row {
+    flex-wrap: wrap;
+  }
+
+  /* Chat spacing */
+  .chat-container {
+    height: calc(100vh - 56px);
+  }
+  .chat-messages {
+    padding: 20px 16px 16px;
+  }
+  .chat-input-area {
+    padding: 14px 16px 18px;
+  }
+  .chat-input-wrap {
+    width: 100%;
+  }
+
+  .quick-actions {
+    padding: 0 16px 12px;
+  }
+
+  /* AI Assistant — mobile header: stack title + attribution, align with page inset */
+  .chat-header {
+    flex-direction: column;
+    align-items: stretch;
+    flex-wrap: nowrap;
+    padding: 14px 16px;
+    gap: 10px;
+  }
+  .chat-header-main {
+    width: 100%;
+  }
+  .chat-header-powered {
+    margin-left: 0;
+    white-space: normal;
+    font-size: 11px;
+    padding-left: 48px; /* align with title text (icon 36 + gap 12) */
+  }
+  .message {
+    max-width: 100%;
+  }
+
+  /* Meal ordering — align with other pages on narrow viewports */
+  .meal-page {
+    padding: 0 16px 16px;
+    padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
+    max-width: 100%;
+    overflow-x: clip; /* no horizontal page scroll; children use wrap / equal flex */
+  }
+  /* Don’t double horizontal padding: header + meal-page was tighter on body than title row */
+  .meal-page .page-header {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .meal-session-row {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: visible;
+    gap: 6px;
+    padding-bottom: 0;
+    padding-inline-end: 0;
+  }
+  .meal-session-row > .meal-session-btn {
+    flex: 1 1 0%;
+    min-width: 0;
+    align-items: center;
+    padding: 8px 4px;
+    text-align: center;
+  }
+  .meal-session-btn .meal-session-label {
+    font-size: 10px;
+    line-height: 1.2;
+    width: 100%;
+    text-align: center;
+  }
+  .meal-session-btn .meal-session-time {
+    font-size: 9px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  .meal-category-tabs {
+    flex-wrap: wrap;
+    row-gap: 6px;
+    max-width: 100%;
+    min-width: 0;
+    padding-inline-end: 0;
+  }
+  .meal-category-tabs .btn {
+    white-space: nowrap;
+    text-align: center;
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+
+  .meal-menu-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .meal-item-card {
+    padding: 14px 18px 14px 16px;
+  }
+  .meal-success-grid {
+    grid-template-columns: 1fr;
+  }
+  .meal-cart-column {
+    position: static;
+  }
+
+  /* Two-column pages stack to one column */
+  .page-grid-two-col {
+    grid-template-columns: 1fr;
+  }
+
+  /* Sidebar becomes an off-canvas drawer */
+  .mobile-sidebar-toggle {
+    display: inline-flex;
+  }
+
+  .mobile-sidebar-backdrop {
+    display: block;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 30;
+    transform: translateX(-100%);
+    box-shadow: 6px 0 28px rgba(0, 0, 0, 0.18);
+  }
+
+  /* `open` is set when sidebarOpen=true in Layout.jsx */
+  .sidebar.open {
+    transform: translateX(0);
+    width: min(240px, 84vw);
+  }
+
+  /* Keep off-canvas closed when "collapsed" is used on mobile */
+  .sidebar.collapsed {
+    transform: translateX(-100%);
+    width: min(240px, 84vw);
+  }
+
+  /* Main content should always take full width */
+  .main-content {
+    width: 100%;
+  }
+}
